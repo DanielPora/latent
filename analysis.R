@@ -1,6 +1,7 @@
 library(dplyr)
 library(ggplot2)
-setwd("C:/Studium/BA Latent Groups")
+library(rstudioapi)
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 library(ggcorrplot)
 library(tidyverse)
 library('corrr')
@@ -33,7 +34,7 @@ synth1000 <- read.csv("synth1000.csv")
 
 
 
-# 1. Specific clusters regarding to the test
+# 1. Specific clusters regarding to the tests
 subj_tests <- clean %>%
   select("workerID", "aq_score_subset", "opt_score", "stroop_difference")%>%
   distinct()
@@ -81,7 +82,7 @@ corr_matrix
 # matrix to confirm.
 # Density of OPT shows a bi-modal distribution. Suggesting that participants
 # can be grouped in two optical perspective related groups.
-# There doesn't seem to be more of a structure. PCA was done in a seperated
+# There doesn't seem to be more of a structure. PCA was done in a separated
 # analysis, but without any insightful result.
  
 
@@ -102,11 +103,26 @@ nrow(lr_p)
 clean %>%
   count(perspective)
 
+worker_fb_p <- fb_p %>%
+  count(workerID, sort = TRUE) 
+
+worker_fb <- clean %>%
+  filter(perspective == "same", targetPos == "F" | targetPos == "B") %>%
+  count(workerID)
+
+diff <- left_join(worker_fb_p, worker_fb, by="workerID", suffix=c("_p", "_all"))
+diff %>%
+  mutate(prop = round(n_p/n_all,2))%>%
+  arrange(desc(prop))
+
 # 2.2 Summary
-# In 1404 same perspective experiments occurred 1 left-right confusion (>0.001)
-# and 74 front-back confusions (=0.05)
-# This suggest that in about 5% of the cases for a "different" perspective front-back
-# scenario the own-other classification is not correct
+# In 1404 same perspective experiments occurred 1 left-right confusion (>0.001),
+# which is neglectable, and 74 front-back confusions (=0.05)
+# This suggest that in about 5% of the cases for a "different" perspective 
+# front-back scenario the own-other perspective classification is not correct.
+# In particular we can see that half of the participants who confused front-back
+# did it systematically. Therefore it's suggested to invert the interpretation
+# for their own.cod and other.cod entries
 
 
 # 3 Individual perspective preference
@@ -120,21 +136,37 @@ fb <- clean %>%
 lr <- clean %>%
   filter(perspective == "different", targetPos == "L" | targetPos == "R")
 
-# ... and all scenarios together to analyse the prefference by subject 
+# ... and all scenarios together to analyse the perspective preference by subject
+# owb_tendency describes here whether the participant preferred the egocentric
+# perspective versus the othercentric perspective.
+# 1 = always egocentric, 0 = 50/50, -1 = always othercentric
 by_subj_diff <- clean %>%
   filter(perspective == "different") %>%
   group_by(workerID) %>%
-  summarise(resp_diff = mean(respTime), sd_diff = sd(respTime), own_sum_diff = sum(own.cod), other_sum_diff = sum(other.cod))
+  summarise(respTime_mean = mean(respTime), respTime_sd = sd(respTime), 
+            own_sum_diff = sum(own.cod), other_sum_diff = sum(other.cod),
+            own_tendency = (sum(own.cod)-sum(other.cod))/(sum(own.cod)+sum(other.cod)),
+            aq_score = mean(aq_score_subset), 
+            opt_score = mean(opt_score_total),stroop_difference = mean(stroop_difference))
+
 
 by_sub_fb <- fb %>%
   group_by(workerID) %>%
-  summarise(resp_diff = mean(respTime), sd_diff = sd(respTime), own_sum_diff = sum(own.cod), other_sum_diff = sum(other.cod))
+  summarise(respTime_mean = mean(respTime), respTime_sd = sd(respTime), 
+            own_sum_diff = sum(own.cod), other_sum_diff = sum(other.cod),
+            own_tendency = (sum(own.cod)-sum(other.cod))/(sum(own.cod)+sum(other.cod)),
+            aq_score = mean(aq_score_subset), 
+            opt_score = mean(opt_score_total),stroop_difference = mean(stroop_difference))
 
 by_sub_lr <- lr %>%
   group_by(workerID) %>%
-  summarise(resp_diff = mean(respTime), sd_diff = sd(respTime), own_sum_diff = sum(own.cod), other_sum_diff = sum(other.cod))
+  summarise(respTime_mean = mean(respTime), respTime_sd = sd(respTime), 
+            own_sum_diff = sum(own.cod), other_sum_diff = sum(other.cod),
+            own_tendency = (sum(own.cod)-sum(other.cod))/(sum(own.cod)+sum(other.cod)),
+            aq_score = mean(aq_score_subset), 
+            opt_score = mean(opt_score_total),stroop_difference = mean(stroop_difference))
 
-
+# 3.2 Visualizing
 
 
 
