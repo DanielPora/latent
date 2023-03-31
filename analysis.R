@@ -8,7 +8,7 @@ library('corrr')
 #install.packages("tidyverse")
 library("FactoMineR")
 library("factoextra")
-
+library(gridExtra)
 
 dat_tar <- read.csv("data_s3_target.csv")
 dat_id <- read.csv("data_s3_ID.csv")
@@ -117,7 +117,7 @@ diff %>%
 
 # 2.2 Summary
 # In 1404 same perspective experiments occurred 1 left-right confusion (>0.001),
-# which is neglectable, and 74 front-back confusions (=0.05)
+# which is neglect able, and 74 front-back confusions (=0.05)
 # This suggest that in about 5% of the cases for a "different" perspective 
 # front-back scenario the own-other perspective classification is not correct.
 # In particular we can see that half of the participants who confused front-back
@@ -126,6 +126,9 @@ diff %>%
 
 
 # 3 Individual perspective preference
+
+# Individual perspective preference is in direct relation to the interpretation 
+# of LCA yielded groups
 
 # 3.1 Relevant here are the "different" perspective scenarios
 
@@ -137,7 +140,7 @@ lr <- clean %>%
   filter(perspective == "different", targetPos == "L" | targetPos == "R")
 
 # ... and all scenarios together to analyse the perspective preference by subject
-# owb_tendency describes here whether the participant preferred the egocentric
+# own_tendency describes here whether the participant preferred the egocentric
 # perspective versus the othercentric perspective.
 # 1 = always egocentric, 0 = 50/50, -1 = always othercentric
 by_subj_diff <- clean %>%
@@ -150,7 +153,7 @@ by_subj_diff <- clean %>%
             opt_score = mean(opt_score_total),stroop_difference = mean(stroop_difference))
 
 
-by_sub_fb <- fb %>%
+by_subj_fb <- fb %>%
   group_by(workerID) %>%
   summarise(respTime_mean = mean(respTime), respTime_sd = sd(respTime), 
             own_sum_diff = sum(own.cod), other_sum_diff = sum(other.cod),
@@ -158,7 +161,7 @@ by_sub_fb <- fb %>%
             aq_score = mean(aq_score_subset), 
             opt_score = mean(opt_score_total),stroop_difference = mean(stroop_difference))
 
-by_sub_lr <- lr %>%
+by_subj_lr <- lr %>%
   group_by(workerID) %>%
   summarise(respTime_mean = mean(respTime), respTime_sd = sd(respTime), 
             own_sum_diff = sum(own.cod), other_sum_diff = sum(other.cod),
@@ -169,12 +172,37 @@ by_sub_lr <- lr %>%
 # 3.2 Visualizing
 
 
+p1 <- ggplot(by_subj_diff, aes(own_tendency))+
+  geom_histogram()+
+  ggtitle("Combined different perspective tasks")
+
+ggplot(by_subj_diff, aes(aq_score, opt_score, color = own_tendency))+
+  geom_point()
+
+ggplot(by_subj_diff, aes(own_tendency, opt_score))+
+  geom_point()
+
+p2 <- ggplot(by_subj_fb, aes(own_tendency))+
+  geom_histogram()+
+  ggtitle("Only front-back different perspective tasks")
+
+p3 <- ggplot(by_subj_lr, aes(own_tendency))+
+  geom_histogram()+
+  ggtitle("Only left-right different perspective tasks")
+
+grid.arrange(p1, p2,p3, ncol=3)
 
 
+# 3.3 Summary
 
-
-
-
+# It is surprising that reference for perspective taking seems to be dependent on
+# the direction. From the histograms we can see a strong egocentric tendency in 
+# left-right tests and a medium tendency for a othercentric perspective in 
+# front-back tests.
+# Again, this could also be the result of some participant being
+# confused about where the front and back in the experiment from their own 
+# perspective was. This could explain why for the combined setting the counts
+# even out a bit. 
 
 
 
@@ -227,7 +255,6 @@ ggplot(by_subj, aes(direction_all))+
   geom_histogram()
   
 
-synth1000 <- read.csv("synth1000.csv")
 
 
 
