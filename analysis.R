@@ -39,6 +39,8 @@ subj_tests <- clean %>%
   select("workerID", "aq_score_subset", "opt_score", "stroop_difference")%>%
   distinct()
 
+write.csv(subj_tests, "subj_test.csv", row.names = FALSE)
+
 # 1.1. Normalizing the tests data
 subj_tests_norm <- as.data.frame(scale(subj_tests[2:4]))
 subj_tests_norm <- subj_tests_norm%>%

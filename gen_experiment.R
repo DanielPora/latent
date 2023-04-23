@@ -3,4 +3,5 @@ library(rstudioapi)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 
-data <- read.csv("subj_tests_syth.csv")
+experiment <- read.csv("subj_test_synth.csv")
+experiment <- distinct(experiment) 
