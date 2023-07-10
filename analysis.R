@@ -9,6 +9,12 @@ library('corrr')
 library("FactoMineR")
 library("factoextra")
 library(gridExtra)
+#install.packages("tidyLPA")
+library(tidyLPA)
+#install.packages("poLCA", dependencies = TRUE)
+library(poLCA)
+
+
 
 dat_tar <- read.csv("data_s3_target.csv")
 dat_id <- read.csv("data_s3_ID.csv")
@@ -35,11 +41,13 @@ synth1000 <- read.csv("synth1000.csv")
 
 
 # 1. Specific clusters regarding to the tests
+
+# Subjects listed with their respective total scores for the 3 tests
 subj_tests <- clean %>%
   select("workerID", "aq_score_subset", "opt_score", "stroop_difference")%>%
   distinct()
 
-write.csv(subj_tests, "subj_test.csv", row.names = FALSE)
+
 
 # 1.1. Normalizing the tests data
 subj_tests_norm <- as.data.frame(scale(subj_tests[2:4]))
@@ -53,7 +61,7 @@ rownames(tests_norm) <- data_normalized[,1]
 
 ggplot(stack(tests_norm), aes(x = ind, y = values)) +
   stat_boxplot(geom = "errorbar", width = 0.25) +
-  labs(x="Test", y="Normalized Value") +
+  labs(x="Tests", y="Normalized Value") +
   geom_boxplot() 
 
 # 1.2 Plotting densities of each test
@@ -84,68 +92,81 @@ corr_matrix
 # matrix to confirm.
 # Density of OPT shows a bi-modal distribution. Suggesting that participants
 # can be grouped in two optical perspective related groups.
-# There doesn't seem to be more of a structure. PCA was done in a separated
-# analysis, but without any insightful result.
+# There doesn't seem to be more of a structure.
  
 
 # 2. Perspective taking preferences
 
-# 2.1. Identify problems for same perspective task
+# 2.1. Identify problems for same perspective (s-p) task
 problems <- clean %>%
   filter(clean$accuracy == "0")
-# Front-Back problems
+# Front-Back errors in all s-p trails
 fb_p <- problems %>%
   filter(problems$targetPos == "F" |problems$targetPos == "B")
-# Left-Right problems
+# Left-Right errors in all s-p trails
 lr_p <- problems %>%
   filter(problems$targetPos == "L" |problems$targetPos == "R")
+#74 FB errors
 nrow(fb_p)
+#1 LR error
 nrow(lr_p)
 
+#Numbers of different and same perspective trials in total
 clean %>%
   count(perspective)
 
-worker_fb_p <- fb_p %>%
-  count(workerID, sort = TRUE) 
-
+#subjects and the number of total FB trails
 worker_fb <- clean %>%
   filter(perspective == "same", targetPos == "F" | targetPos == "B") %>%
   count(workerID)
+#subjects and the number of errors they made in same perspective FB trails
+worker_fb_p <- fb_p %>%
+  count(workerID, sort = TRUE) 
 
+#Workers and the proportion of errors they made in FB trails
 diff <- left_join(worker_fb_p, worker_fb, by="workerID", suffix=c("_p", "_all"))
 diff %>%
   mutate(prop = round(n_p/n_all,2))%>%
   arrange(desc(prop))
 
 # 2.2 Summary
-# In 1404 same perspective experiments occurred 1 left-right confusion (>0.001),
-# which is neglect able, and 74 front-back confusions (=0.05)
+# In 1404 same perspective experiments occurred 1 left-right confusion (<0.1%),
+# which is neglect able, and 74 front-back confusions (=5.3%)
 # This suggest that in about 5% of the cases for a "different" perspective 
 # front-back scenario the own-other perspective classification is not correct.
 # In particular we can see that half of the participants who confused front-back
 # did it systematically. Therefore it's suggested to invert the interpretation
-# for their own.cod and other.cod entries
+# for their own.cod and other.cod entries or remove them from the analysis.
 
+exclusions = diff$workerID
+clean_ex <- clean %>%
+  filter(!(workerID %in% exclusions)) 
+#Leaving out 412 observations
 
 # 3 Individual perspective preference
 
-# Individual perspective preference is in direct relation to the interpretation 
-# of LCA yielded groups
 
-# 3.1 Relevant here are the "different" perspective scenarios
+# 3.1 Investigating "different" perspective scenarios
 
 # Using front-back, left-right... 
+
 fb <- clean %>%
   filter(perspective == "different", targetPos == "F" | targetPos == "B")
 
+fb_cl <- clean_ex %>%
+  filter(perspective == "different", targetPos == "F" | targetPos == "B")
+
 lr <- clean %>%
+  filter(perspective == "different", targetPos == "L" | targetPos == "R")
+
+lr_cl <- clean_ex %>%
   filter(perspective == "different", targetPos == "L" | targetPos == "R")
 
 # ... and all scenarios together to analyse the perspective preference by subject
 # own_tendency describes here whether the participant preferred the egocentric
 # perspective versus the othercentric perspective.
 # 1 = always egocentric, 0 = 50/50, -1 = always othercentric
-by_subj_diff <- clean %>%
+by_subj_diff <- clean_ex %>%
   filter(perspective == "different") %>%
   group_by(workerID) %>%
   summarise(respTime_mean = mean(respTime), respTime_sd = sd(respTime), 
@@ -155,7 +176,7 @@ by_subj_diff <- clean %>%
             opt_score = mean(opt_score_total),stroop_difference = mean(stroop_difference))
 
 
-by_subj_fb <- fb %>%
+by_subj_fb <- fb_cl %>%
   group_by(workerID) %>%
   summarise(respTime_mean = mean(respTime), respTime_sd = sd(respTime), 
             own_sum_diff = sum(own.cod), other_sum_diff = sum(other.cod),
@@ -163,7 +184,7 @@ by_subj_fb <- fb %>%
             aq_score = mean(aq_score_subset), 
             opt_score = mean(opt_score_total),stroop_difference = mean(stroop_difference))
 
-by_subj_lr <- lr %>%
+by_subj_lr <- lr_cl %>%
   group_by(workerID) %>%
   summarise(respTime_mean = mean(respTime), respTime_sd = sd(respTime), 
             own_sum_diff = sum(own.cod), other_sum_diff = sum(other.cod),
@@ -199,20 +220,61 @@ grid.arrange(p1, p2,p3, ncol=3)
 
 # It is surprising that reference for perspective taking seems to be dependent on
 # the direction. From the histograms we can see a strong egocentric tendency in 
-# left-right tests and a medium tendency for a othercentric perspective in 
-# front-back tests.
-# Again, this could also be the result of some participant being
-# confused about where the front and back in the experiment from their own 
-# perspective was. This could explain why for the combined setting the counts
-# even out a bit. 
+# left-right trials and a medium tendency for a othercentric perspective in 
+# front-back trials.
+
+
+# 4 LCA Perspective preference
+
+# Considered are only different perspective items grouped for front-back (FB)
+# and left-right (LR) 
+
+# 4.1 Plotting the tendencies
+by_subj_lr <- by_subj_lr %>%
+  filter(workerID %in% by_subj_fb$workerID)
+  
+df <- data.frame(by_subj_lr$workerID,'fb_tend'=by_subj_fb$own_tendency,
+                 'lr_tend'=by_subj_lr$own_tendency, 'aq'=by_subj_lr$aq_score,
+                 'opt' =by_subj_lr$opt_score, 'stroop'=by_subj_lr$stroop_difference)
+
+ggplot(df, aes(fb_tend, lr_tend, color=opt))+
+  geom_jitter(width=0.1, height=0.1)+
+  scale_colour_gradientn(colours=rainbow(4))
+
+# 4.2 LCA with poLCA
+
+trails_diff <- clean_ex %>%
+  filter(clean_ex$perspective == 'different')
+
+# Different number of trails for subjects make an LCA encoding hard.
+# 28 of 153 participant did not complete all different perspective 8 trails.
+count(trails_diff, workerID, sort=TRUE)
 
 
 
 
 
 
+lmer(own.cod ~targetPos + opt_score_total + (age|opt_score_total), data=trails_diff) %>%
+  summary()
 
+data("USArrests")      # Loading the data set
+df_bsp <- scale(USArrests) # Scaling the data
 
+# View the first 3 rows of the data
+head(df, n = 3)
+
+res_kmean <- kmeans(df[c('opt')], 2, iter.max = 120, nstart = 10)
+
+cluster <- res_kmean$cluster %>%
+  factor()
+
+df_km <- df %>%
+  mutate('kmean_class' = cluster)
+
+ggplot(df_km, aes(fb_tend, lr_tend, color=kmean_class))+
+  geom_jitter(width=0.1, height=0.1)
+  
 
 
 by_subj <- clean %>%
