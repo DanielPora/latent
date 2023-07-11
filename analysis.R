@@ -1,21 +1,18 @@
+library(poLCA)
+#install.packages("poLCA", dependencies = TRUE)
+library(data.table)
+library(plyr)
 library(dplyr)
 library(ggplot2)
 library(rstudioapi)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-library(ggcorrplot)
-library(tidyverse)
-library('corrr')
-#install.packages("tidyverse")
-library("FactoMineR")
-library("factoextra")
-library(gridExtra)
-#install.packages("tidyLPA")
 library(tidyLPA)
-#install.packages("poLCA", dependencies = TRUE)
-library(poLCA)
+#install.packages("tidyLPA")
+library(gridExtra)
+library(tidyr)
+##########################################################################
 
-
-
+# read data
 dat_tar <- read.csv("data_s3_target.csv")
 dat_id <- read.csv("data_s3_ID.csv")
 
@@ -224,7 +221,7 @@ grid.arrange(p1, p2,p3, ncol=3)
 # front-back trials.
 
 
-# 4 LCA Perspective preference
+# 4 LCA/LPA Perspective preference
 
 # Considered are only different perspective items grouped for front-back (FB)
 # and left-right (LR) 
@@ -237,154 +234,131 @@ df <- data.frame(by_subj_lr$workerID,'fb_tend'=by_subj_fb$own_tendency,
                  'lr_tend'=by_subj_lr$own_tendency, 'aq'=by_subj_lr$aq_score,
                  'opt' =by_subj_lr$opt_score, 'stroop'=by_subj_lr$stroop_difference)
 
+# We can see 3 main clusters -1/-1(pure othercentrics), -1/1(lr egocentrics) and 
+# 1/1(pure egocentrics), highlighting that FB and LR perspective preference is
+# not symmetrical, since there is no 1/-1 cluster.
+ggplot(df, aes(fb_tend, lr_tend, color=aq))+
+  geom_jitter(width=0.1, height=0.1)+
+  scale_colour_gradientn(colours=rainbow(4))
+ggplot(df, aes(fb_tend, lr_tend, color=stroop))+
+  geom_jitter(width=0.1, height=0.1)+
+  scale_colour_gradientn(colours=rainbow(4))
+# Visually there does not seem to be a correlation to AQ and Stroop scores
+# on their own.
+
+# With OPT score on the other hand:
 ggplot(df, aes(fb_tend, lr_tend, color=opt))+
   geom_jitter(width=0.1, height=0.1)+
   scale_colour_gradientn(colours=rainbow(4))
+# Visually we get ideas about the distribution of OPT scores and tendencies.
+# Subjects with good OPT score (lower) seem to prefer othercentric views, while
+# worse OPT score subjects tend to LR-egocentrism. The class of pure egocentric
+# subjects has a mixture of OPT scores.
+# Indifferent/random or FB egocentric subjects are not common at all.
 
-# 4.2 LCA with poLCA
+# 4.2 LPA for individual differences
+
+# Based on AHP a 4 Class model is the best choice
+df %>%
+  select(aq, opt, stroop) %>%
+  single_imputation() %>%
+  estimate_profiles(1:5)%>% 
+  compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik"))
+
+# No clear separation of classes was found. The classes are mostly governed by
+# OPT score that is relatively good separated into 2 classes (1+2 and 3+4). 
+df %>%
+  select(aq, opt, stroop) %>%
+  scale() %>%
+  estimate_profiles(4) %>%
+  plot_profiles()
+
+# 2 classes had also the best BIC value and looks much more fitting for OPT.
+# The other scores seem to not fit very well to any class though.
+df %>%
+  select(aq, opt, stroop) %>%
+  scale() %>%
+  estimate_profiles(2) %>%
+  plot_profiles()
+
+# LPA for 2 and 4 classes
+LPA_2 <- df %>%
+  select(aq, opt, stroop) %>%
+  single_imputation() %>%
+  estimate_profiles(2)
+
+classes_2 <- get_data(LPA_2)$Class %>%
+  factor()
+
+LPA_4 <- df %>%
+  select(aq, opt, stroop) %>%
+  single_imputation() %>%
+  estimate_profiles(4)
+
+classes_4 <- get_data(LPA_4)$Class %>%
+  factor()
+
+df_LPA_classes <- df %>%
+  mutate('class_2' = classes_2, 'class_4'=classes_4)
+  
+# 2 classes plot, resembles tendencies plot from 4.1
+ggplot(df_LPA_classes, aes(fb_tend, lr_tend, color=class_2))+
+  geom_jitter(width=0.1, height=0.1)
+
+# 4 classes plot
+ggplot(df_LPA_classes, aes(fb_tend, lr_tend, color=class_4))+
+  geom_jitter(width=0.1, height=0.1)
+
+
+# 4.3 LCA
 
 trails_diff <- clean_ex %>%
   filter(clean_ex$perspective == 'different')
 
 # Different number of trails for subjects make an LCA encoding hard.
 # 28 of 153 participant did not complete all different perspective 8 trails.
+# LCA uses categorical data, so using the tendencies is not possible. 
 count(trails_diff, workerID, sort=TRUE)
 
+# Changing the data to a different format, where response to R1 (first 
+# targetPos R trail) is 1 for subject choose egocentric and 2 for subject
+# choose othercentric. Example:
+# Subject R1 R2 L1 L2 F1 F2 B1 B2
+# Q3AAKY3  1  1  1  1  2  2  2  2
 
+# filtering only workers who completed all 8 tasks
+tasks_comp <- count(trails_diff, workerID, sort=TRUE) %>%
+  filter(n==8)%>%
+  select(workerID)
 
+trails_comp <- trails_diff %>%
+  filter(workerID %in% tasks_comp$workerID) %>%
+  select(workerID, targetPos, other.cod)
 
-
-
-lmer(own.cod ~targetPos + opt_score_total + (age|opt_score_total), data=trails_diff) %>%
-  summary()
-
-data("USArrests")      # Loading the data set
-df_bsp <- scale(USArrests) # Scaling the data
-
-# View the first 3 rows of the data
-head(df, n = 3)
-
-res_kmean <- kmeans(df[c('opt')], 2, iter.max = 120, nstart = 10)
-
-cluster <- res_kmean$cluster %>%
-  factor()
-
-df_km <- df %>%
-  mutate('kmean_class' = cluster)
-
-ggplot(df_km, aes(fb_tend, lr_tend, color=kmean_class))+
-  geom_jitter(width=0.1, height=0.1)
-  
-
-
-by_subj <- clean %>%
+# make sure every targetPos has 2 entries for each subject
+trails_comp %>%
   group_by(workerID) %>%
-  summarise(resp_all = mean(respTime), sd_all = sd(respTime), own_sum_all = sum(own.cod), other_sum_all = sum(other.cod))
+  count(targetPos) %>%
+  filter(n != 2)
 
-by_subj_same <- clean %>%
-  filter(perspective == "same") %>%
-  group_by(workerID) %>%
-  summarise(resp_same = mean(respTime), sd_same = sd(respTime), own_sum_same = sum(own.cod), other_sum_same = sum(other.cod))
+# order by workerID and then tragetPos
+tc_ordered <- trails_comp[with(trails_comp, order(workerID, targetPos)), ]
+# extend to wide format and naming accordingly
+data_with_index <- ddply(tc_ordered, .(workerID), mutate, 
+                         index = c('B1','B2','F1','F2','L1','L2','R1','R2')[1:length(workerID)])
+df.LCA_id <- dcast(data_with_index, workerID ~ index, value.var = 'other.cod')
+# for poLCA we will need only the value column and no zero or negative values
+df.LCA <- df.LCA_id %>% 
+  select(-workerID)
+df.LCA <- df.LCA+1
 
-
-by_subj <- mutate(by_subj, total_sum_all = own_sum_all+other_sum_all)
-by_subj <- mutate(by_subj, direction_all = (own_sum_all-other_sum_all)/total_sum_all)
-
-by_subj_diff <- mutate(by_subj_diff, total_sum_diff = own_sum_diff+other_sum_diff)
-by_subj_diff <- mutate(by_subj_diff, direction_diff = (own_sum_diff-other_sum_diff)/total_sum_diff)
-
-by_subj_same <- mutate(by_subj_same, total_sum_same = own_sum_same+other_sum_same)
-by_subj_same <- mutate(by_subj_same, direction_same = (own_sum_same-other_sum_same)/total_sum_same)
-
-
-
-
-direction_density <- density(by_subj$direction_all)
-direction_density_diff <- density(by_subj_diff$direction_diff)
-direction_density_same <- density(by_subj_same$direction_same)
-
-
-plot(direction_density_diff, ylim = c(0,2), col = "blue")
-lines(direction_density, col = "red")
-lines(direction_density_same, col = "green")
-legend("topleft", legend = c("All trials", "same", "different"),
-       lwd = 3, col = c("red", "green", "blue"))
-
-
-hist(by_subj$direction_all, prob = TRUE, xlim = c(-1,1), ylim = c(0,10), col = "blue", breaks = 9)
-hist(by_subj_diff$direction_diff, prob = TRUE, add=TRUE, col = "red", breaks = 9)
-hist(by_subj_same$direction_same, prob = TRUE, add=TRUE, col = "green", breaks = 9)
-
-ggplot(by_subj, aes(direction_all))+
-  geom_histogram()
-  
+# Using poLCA
+f <- cbind(B1, B2, F1, F2, L1, L2, R1, R2)~1
+lca_2 <- poLCA(f, df.LCA, nclass = 2)
+lca_3 <- poLCA(f, df.LCA, nclass = 3)
+lca_4 <- poLCA(f, df.LCA, nclass = 4)
 
 
 
 
-subj_tests <- clean %>%
-  select("workerID", "aq_score_subset", "opt_score", "stroop_difference")%>%
-  distinct()
 
-
-
-
-  
-  
-ggplot(subj_tests_norm, aes(aq_score_subset, opt_score, size = stroop_difference))+
-  geom_point()
-
-data_normalized <- subj_tests_norm %>%
-  select("workerID", "aq_score_subset", "opt_score", "stroop_difference")
-d2 <- data_normalized[,-1]
-rownames(d2) <- data_normalized[,1]
-
-corr_matrix <- cor(d2)
-corr_matrix
-
-
-
-data.pca <- princomp(corr_matrix)
-summary(data.pca)
-
-
- 
-
-
-res.pca <- PCA(d2, graph = TRUE)
-
-ggplot(d2, aes(aq_score_subset))+
-  geom_density()
-
-ggplot(d2, aes(opt_score))+
-  geom_density()
-
-ggplot(d2, aes(stroop_difference))+
-  geom_density()
-
-ggplot(d2, aes(aq_score_subset, opt_score))+
-  geom_point()
-
-ggplot(d2, aes(aq_score_subset, stroop_difference))+
-  geom_point()
-
-ggplot(d2, aes(stroop_difference, opt_score))+
-  geom_point()
-
-pca <- prcomp(d2)
-rotated <- as.data.frame(scale(d2, pca$center, pca$scale) %*% pca$rotation)
-
-ggplot(d2, aes(aq_score_subset, opt_score, size = stroop_difference))+
-  geom_point()
-
-ggplot(rotated, aes(PC1, PC2, size = PC3))+
-  geom_point()
-
-pca2 <- prcomp(d2[c("stroop_difference", "aq_score_subset")])
-rotated2 <- as.data.frame(scale(d2[c("stroop_difference", "aq_score_subset")], pca2$center, pca2$scale) %*% pca2$rotation)
-
-summary(pca2)
-summary(pca)
-
-ggplot(rotated2, aes(PC1, PC2))+
-  geom_point()
