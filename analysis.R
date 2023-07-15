@@ -1,18 +1,18 @@
+library(ggplot2)
 library(poLCA)
 #install.packages("poLCA", dependencies = TRUE)
+library(gridExtra)
+library(tidyLPA)
+#install.packages("tidyLPA")
 library(data.table)
 library(plyr)
 library(dplyr)
-library(ggplot2)
-library(rstudioapi)
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-library(tidyLPA)
-#install.packages("tidyLPA")
-library(gridExtra)
-library(tidyr)
+library(lme4)
 ##########################################################################
 
 # read data
+library(rstudioapi)
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 dat_tar <- read.csv("data_s3_target.csv")
 dat_id <- read.csv("data_s3_ID.csv")
 
@@ -37,22 +37,21 @@ synth1000 <- read.csv("synth1000.csv")
 
 
 
-# 1. Specific clusters regarding to the tests
+#### 1. Specific clusters regarding to the tests
 
 # Subjects listed with their respective total scores for the 3 tests
 subj_tests <- clean %>%
-  select("workerID", "aq_score_subset", "opt_score", "stroop_difference")%>%
+  dplyr::select("workerID", "aq_score_subset", "opt_score", "stroop_difference")%>%
   distinct()
 
 
-
-# 1.1. Normalizing the tests data
+## 1.1 Normalizing the tests data
 subj_tests_norm <- as.data.frame(scale(subj_tests[2:4]))
 subj_tests_norm <- subj_tests_norm%>%
   mutate("workerID" = subj_tests$workerID)
 
 data_normalized <- subj_tests_norm %>%
-  select("workerID", "aq_score_subset", "opt_score", "stroop_difference")
+  dplyr::select("workerID", "aq_score_subset", "opt_score", "stroop_difference")
 tests_norm <- data_normalized[,-1]
 rownames(tests_norm) <- data_normalized[,1]
 
@@ -61,7 +60,7 @@ ggplot(stack(tests_norm), aes(x = ind, y = values)) +
   labs(x="Tests", y="Normalized Value") +
   geom_boxplot() 
 
-# 1.2 Plotting densities of each test
+## 1.2 Plotting densities of each test
 ggplot(tests_norm, aes(aq_score_subset))+
   geom_density()
 
@@ -71,7 +70,7 @@ ggplot(tests_norm, aes(opt_score))+
 ggplot(tests_norm, aes(stroop_difference))+
   geom_density()
 
-# 1.3 Scatterplots of pairwise tests 
+## 1.3 Scatterplots of pairwise tests 
 ggplot(tests_norm, aes(aq_score_subset, opt_score))+
   geom_point()
 
@@ -84,7 +83,9 @@ ggplot(tests_norm, aes(stroop_difference, opt_score))+
 corr_matrix <- cor(tests_norm)
 corr_matrix
 
-# 1.4 Summary
+
+## 1.4 Summary
+
 # The scatter plots don't hint at some correlation, using a correlation 
 # matrix to confirm.
 # Density of OPT shows a bi-modal distribution. Suggesting that participants
@@ -92,41 +93,43 @@ corr_matrix
 # There doesn't seem to be more of a structure.
  
 
-# 2. Perspective taking preferences
+#### 2. Perspective taking preferences
 
-# 2.1. Identify problems for same perspective (s-p) task
+## 2.1. Identify problems for same perspective (s-p) task
 problems <- clean %>%
-  filter(clean$accuracy == "0")
+  filter(clean$accuracy == 0)
 # Front-Back errors in all s-p trails
 fb_p <- problems %>%
   filter(problems$targetPos == "F" |problems$targetPos == "B")
 # Left-Right errors in all s-p trails
 lr_p <- problems %>%
   filter(problems$targetPos == "L" |problems$targetPos == "R")
-#74 FB errors
+# 74 FB errors
 nrow(fb_p)
-#1 LR error
+# 1 LR error
 nrow(lr_p)
 
-#Numbers of different and same perspective trials in total
+# Numbers of different and same perspective trials in total
 clean %>%
   count(perspective)
 
-#subjects and the number of total FB trails
+# subjects and the number of total FB trails
 worker_fb <- clean %>%
   filter(perspective == "same", targetPos == "F" | targetPos == "B") %>%
   count(workerID)
-#subjects and the number of errors they made in same perspective FB trails
+# subjects and the number of errors they made in same perspective FB trails
 worker_fb_p <- fb_p %>%
   count(workerID, sort = TRUE) 
 
-#Workers and the proportion of errors they made in FB trails
+# Workers and the proportion of errors they made in FB trails
 diff <- left_join(worker_fb_p, worker_fb, by="workerID", suffix=c("_p", "_all"))
 diff %>%
   mutate(prop = round(n_p/n_all,2))%>%
   arrange(desc(prop))
 
-# 2.2 Summary
+
+## 2.2 Summary
+
 # In 1404 same perspective experiments occurred 1 left-right confusion (<0.1%),
 # which is neglect able, and 74 front-back confusions (=5.3%)
 # This suggest that in about 5% of the cases for a "different" perspective 
@@ -138,12 +141,13 @@ diff %>%
 exclusions = diff$workerID
 clean_ex <- clean %>%
   filter(!(workerID %in% exclusions)) 
-#Leaving out 412 observations
-
-# 3 Individual perspective preference
+# Leaving out 412 observations
 
 
-# 3.1 Investigating "different" perspective scenarios
+#### 3 Individual perspective preference
+
+
+## 3.1 Investigating "different" perspective scenarios
 
 # Using front-back, left-right... 
 
@@ -172,7 +176,6 @@ by_subj_diff <- clean_ex %>%
             aq_score = mean(aq_score_subset), 
             opt_score = mean(opt_score_total),stroop_difference = mean(stroop_difference))
 
-
 by_subj_fb <- fb_cl %>%
   group_by(workerID) %>%
   summarise(respTime_mean = mean(respTime), respTime_sd = sd(respTime), 
@@ -189,7 +192,8 @@ by_subj_lr <- lr_cl %>%
             aq_score = mean(aq_score_subset), 
             opt_score = mean(opt_score_total),stroop_difference = mean(stroop_difference))
 
-# 3.2 Visualizing
+
+## 3.2 Visualizing
 
 
 p1 <- ggplot(by_subj_diff, aes(own_tendency))+
@@ -213,7 +217,7 @@ p3 <- ggplot(by_subj_lr, aes(own_tendency))+
 grid.arrange(p1, p2,p3, ncol=3)
 
 
-# 3.3 Summary
+## 3.3 Summary
 
 # It is surprising that reference for perspective taking seems to be dependent on
 # the direction. From the histograms we can see a strong egocentric tendency in 
@@ -221,16 +225,16 @@ grid.arrange(p1, p2,p3, ncol=3)
 # front-back trials.
 
 
-# 4 LCA/LPA Perspective preference
+#### 4 LPA Individual differences effect on perspective taking
 
 # Considered are only different perspective items grouped for front-back (FB)
 # and left-right (LR) 
 
-# 4.1 Plotting the tendencies
+## 4.1 Plotting the tendencies
 by_subj_lr <- by_subj_lr %>%
   filter(workerID %in% by_subj_fb$workerID)
   
-df <- data.frame(by_subj_lr$workerID,'fb_tend'=by_subj_fb$own_tendency,
+df <- data.frame('workerID' =by_subj_lr$workerID,'fb_tend'=by_subj_fb$own_tendency,
                  'lr_tend'=by_subj_lr$own_tendency, 'aq'=by_subj_lr$aq_score,
                  'opt' =by_subj_lr$opt_score, 'stroop'=by_subj_lr$stroop_difference)
 
@@ -256,11 +260,12 @@ ggplot(df, aes(fb_tend, lr_tend, color=opt))+
 # subjects has a mixture of OPT scores.
 # Indifferent/random or FB egocentric subjects are not common at all.
 
-# 4.2 LPA for individual differences
+
+## 4.2 LPA for individual differences
 
 # Based on AHP a 4 Class model is the best choice
 df %>%
-  select(aq, opt, stroop) %>%
+  dplyr::select(aq, opt, stroop) %>%
   single_imputation() %>%
   estimate_profiles(1:5)%>% 
   compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik"))
@@ -268,7 +273,7 @@ df %>%
 # No clear separation of classes was found. The classes are mostly governed by
 # OPT score that is relatively good separated into 2 classes (1+2 and 3+4). 
 df %>%
-  select(aq, opt, stroop) %>%
+  dplyr::select(aq, opt, stroop) %>%
   scale() %>%
   estimate_profiles(4) %>%
   plot_profiles()
@@ -276,22 +281,30 @@ df %>%
 # 2 classes had also the best BIC value and looks much more fitting for OPT.
 # The other scores seem to not fit very well to any class though.
 df %>%
-  select(aq, opt, stroop) %>%
+  dplyr::select(aq, opt, stroop) %>%
   scale() %>%
   estimate_profiles(2) %>%
   plot_profiles()
 
 # LPA for 2 and 4 classes
 LPA_2 <- df %>%
-  select(aq, opt, stroop) %>%
+  dplyr::select(aq, opt, stroop) %>%
   single_imputation() %>%
   estimate_profiles(2)
 
 classes_2 <- get_data(LPA_2)$Class %>%
   factor()
 
+LPA_3 <- df %>%
+  dplyr::select(aq, opt, stroop) %>%
+  single_imputation() %>%
+  estimate_profiles(3)
+
+classes_3 <- get_data(LPA_3)$Class %>%
+  factor()
+
 LPA_4 <- df %>%
-  select(aq, opt, stroop) %>%
+  dplyr::select(aq, opt, stroop) %>%
   single_imputation() %>%
   estimate_profiles(4)
 
@@ -299,19 +312,27 @@ classes_4 <- get_data(LPA_4)$Class %>%
   factor()
 
 df_LPA_classes <- df %>%
-  mutate('class_2' = classes_2, 'class_4'=classes_4)
+  mutate('class_2' = classes_2, 'class_3'=classes_3, 'class_4'=classes_4)
   
 # 2 classes plot, resembles tendencies plot from 4.1
 ggplot(df_LPA_classes, aes(fb_tend, lr_tend, color=class_2))+
+  geom_jitter(width=0.1, height=0.1)
+
+# 3 classes plot
+ggplot(df_LPA_classes, aes(fb_tend, lr_tend, color=class_3))+
   geom_jitter(width=0.1, height=0.1)
 
 # 4 classes plot
 ggplot(df_LPA_classes, aes(fb_tend, lr_tend, color=class_4))+
   geom_jitter(width=0.1, height=0.1)
 
+# The classes of individual differences don't provide a good 
+# clustering. Based on the weak correlations this is no surprise.
 
-# 4.3 LCA
 
+#### 5 LCA for perspective preference
+
+# 5.1 transforming data to fit LCA
 trails_diff <- clean_ex %>%
   filter(clean_ex$perspective == 'different')
 
@@ -322,18 +343,21 @@ count(trails_diff, workerID, sort=TRUE)
 
 # Changing the data to a different format, where response to R1 (first 
 # targetPos R trail) is 1 for subject choose egocentric and 2 for subject
-# choose othercentric. Example:
-# Subject R1 R2 L1 L2 F1 F2 B1 B2
+# choose othercentric. The values arise from restriction on values of the poLCA
+# package that will be used for LCA.
+# Example:
+# Subject  B1 B2 F1 F2 L1 L2 R1 R2
 # Q3AAKY3  1  1  1  1  2  2  2  2
+
 
 # filtering only workers who completed all 8 tasks
 tasks_comp <- count(trails_diff, workerID, sort=TRUE) %>%
   filter(n==8)%>%
-  select(workerID)
+  dplyr::select(workerID)
 
 trails_comp <- trails_diff %>%
   filter(workerID %in% tasks_comp$workerID) %>%
-  select(workerID, targetPos, other.cod)
+  dplyr::select(workerID, targetPos, other.cod)
 
 # make sure every targetPos has 2 entries for each subject
 trails_comp %>%
@@ -349,16 +373,83 @@ data_with_index <- ddply(tc_ordered, .(workerID), mutate,
 df.LCA_id <- dcast(data_with_index, workerID ~ index, value.var = 'other.cod')
 # for poLCA we will need only the value column and no zero or negative values
 df.LCA <- df.LCA_id %>% 
-  select(-workerID)
+  dplyr::select(-workerID)
 df.LCA <- df.LCA+1
 
-# Using poLCA
-f <- cbind(B1, B2, F1, F2, L1, L2, R1, R2)~1
-lca_2 <- poLCA(f, df.LCA, nclass = 2)
-lca_3 <- poLCA(f, df.LCA, nclass = 3)
-lca_4 <- poLCA(f, df.LCA, nclass = 4)
+
+## 5.2 Applying LCA with poLCA
+
+f <- with(df.LCA, cbind(B1, B2, F1, F2, L1, L2, R1, R2)~1)
+bics <- c()
+for (x in 1:8) {
+lca_x <- poLCA(f, df.LCA, nclass = x, nrep = 10, verbose=FALSE)$bic 
+bics <- append(bics, paste("Classes:",x, "BIC:", lca_x))
+}
+# 3 Class model with the best BIC
+bics
+# printing output and graph
+lca_3 <- poLCA(f, df.LCA, nclass = 3, nrep = 50, graphs = TRUE) 
 
 
+## 5.3 Applying LCA classes to tendency plots
+
+df.LCA_id_class <- df.LCA_id %>%
+  mutate('lca.class' = factor(lca_3$predclass))%>%
+  dplyr::select(workerID, lca.class)
+
+responders <- clean_ex %>%
+  dplyr::select(workerID, responderType)%>%
+  distinct()%>%
+  filter(workerID %in% df.LCA_id_class$workerID)
+
+lca_tend <- df %>%
+  filter(workerID %in% df.LCA_id_class$workerID) %>%
+  merge(df.LCA_id_class, by='workerID',all.x=TRUE)%>%
+  merge(responders, by='workerID', all.x=TRUE)
+
+# LCA could retrieve the tendencies ...
+ggplot(lca_tend, aes(fb_tend, lr_tend, color=lca.class))+
+  geom_jitter(width=0.1, height=0.1)
+# and it matches almost to the clusters in LPA for rate of egocentrism
+# from the experiment paper
+ggplot(lca_tend, aes(fb_tend, lr_tend, color=responderType))+
+  geom_jitter(width=0.1, height=0.1)
+
+# LCA classifies 4 outlier mixed responders differently and allocates them to
+# othercentrics. This makes it harder to interpret the classes as egocentric,
+# othercentric and mixed responders. 
 
 
+#### 6 LMEM
 
+# Create an lmem with targetPos as a random slope for workerID.
+# Such that the individual changes in reaction for the subjects are computed.
+lmem_dat <- trails_comp %>%
+   mutate_if(is.character, as.factor)
+summary(m0 <- lmer(other.cod ~ targetPos + (targetPos | workerID), data=lmem_dat))
+
+# The slope coefficients, Back is the intercept, because of alphabetical ordering
+# Since other.cod is the DV 0 means egocentrical choice and 1 means othercentrical
+# A value of 0.95 for F is the predicted value of other.cod for the respective subject.
+# We can intrepret this as tendency
+coeffs <- coef(m0)$workerID
+coeffs$F <- coeffs$`(Intercept)`+coeffs$targetPosF
+coeffs$B <- coeffs$`(Intercept)`
+coeffs$L <- coeffs$`(Intercept)`+coeffs$targetPosL
+coeffs$R <- coeffs$`(Intercept)`+coeffs$targetPosR
+coeffs
+
+# Grouping to FB and LR by taking the mean of the components
+coeffs$FB <- (coeffs$F+coeffs$B)/2
+coeffs$LR <- (coeffs$L+coeffs$R)/2
+
+# Getting the tendency by averaging again
+coeffs$other = (coeffs$FB+coeffs$LR)/2
+
+# simple classification into 3 classes. [0, .25] Class 0 ; (.25, .75] class 1 ; >.75 class 2
+# Drawback: the number of classes are not automatically determined.
+# Still, the 
+coeffs$class = ifelse(coeffs$other > 0.25, ifelse(coeffs$other > 0.75, 2, 1), 0)
+coeffs$class <- factor(coeffs$class)
+ggplot(lca_tend, aes(fb_tend, lr_tend, color=coeffs$class))+
+  geom_jitter(width=0.1, height=0.1)
