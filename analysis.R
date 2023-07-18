@@ -1,3 +1,9 @@
+
+# In case R studio throws errors when running the whole script at once,
+# try to update all packages and run the library imports line by line.
+# After that you can also run the whole script in one go, 
+
+
 library(ggplot2)
 library(poLCA)
 #install.packages("poLCA", dependencies = TRUE)
@@ -8,11 +14,11 @@ library(data.table)
 library(plyr)
 library(dplyr)
 library(lme4)
+library(rstudioapi)
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 ##########################################################################
 
 # read data
-library(rstudioapi)
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 dat_tar <- read.csv("data_s3_target.csv")
 dat_id <- read.csv("data_s3_ID.csv")
 
@@ -422,12 +428,17 @@ ggplot(lca_tend, aes(fb_tend, lr_tend, color=responderType))+
 
 #### 6 LMEM
 
+
+## 6.1 Specifying the model
+
 # Create an lmem with targetPos as a random slope for workerID.
 # Such that the individual changes in reaction for the subjects are computed.
 lmem_dat <- trails_comp %>%
    mutate_if(is.character, as.factor)
 summary(m0 <- lmer(other.cod ~ targetPos + (targetPos | workerID), data=lmem_dat))
 
+
+## 6.2 Grouping the coefficients
 # The slope coefficients, Back is the intercept, because of alphabetical ordering
 # Since other.cod is the DV 0 means egocentrical choice and 1 means othercentrical
 # A value of 0.95 for F is the predicted value of other.cod for the respective subject.
@@ -443,13 +454,72 @@ coeffs
 coeffs$FB <- (coeffs$F+coeffs$B)/2
 coeffs$LR <- (coeffs$L+coeffs$R)/2
 
-# Getting the tendency by averaging again
+# Getting the tendency by averaging again. Called "other" to interpert for other-
+# centric tendency
 coeffs$other = (coeffs$FB+coeffs$LR)/2
 
 # simple classification into 3 classes. [0, .25] Class 0 ; (.25, .75] class 1 ; >.75 class 2
 # Drawback: the number of classes are not automatically determined.
-# Still, the 
 coeffs$class = ifelse(coeffs$other > 0.25, ifelse(coeffs$other > 0.75, 2, 1), 0)
 coeffs$class <- factor(coeffs$class)
 ggplot(lca_tend, aes(fb_tend, lr_tend, color=coeffs$class))+
   geom_jitter(width=0.1, height=0.1)
+
+
+## 6.3. Histograms and sum-approach
+# Maybe just adding up everything also give es good classification basis
+coeffs$sum <- coeffs$`(Intercept)`+coeffs$targetPosR+coeffs$targetPosF+coeffs$targetPosL
+coeffs$sum <- coeffs$sum -min(coeffs$sum)
+coeffs$sum <- coeffs$sum/max(coeffs$sum)
+# Histograms show tri-modal distribution
+hist(coeffs$sum)
+hist(coeffs$other)
+# LPA on the "sum" or "other" column or  with 3 classes gives a nice separation,
+# but with an important difference:
+coeffs$sum %>%
+single_imputation() %>%
+  estimate_profiles(3)%>% 
+  plot_profiles()
+
+coeffs$other %>%
+  single_imputation() %>%
+  estimate_profiles(3)%>% 
+  plot_profiles()
+
+
+## 6.4 Results
+
+# When the plot uses the new classes for "sum", the interpretation becomes
+# difficult.
+lmm_lpa_sum <- coeffs$sum %>%
+  single_imputation() %>%
+  estimate_profiles(3)
+
+lmm_lpa_sumclass <- get_data(lmm_lpa_sum)$Class %>%
+  factor()
+
+ggplot(lca_tend, aes(fb_tend, lr_tend, color=lmm_lpa_sumclass))+
+  geom_jitter(width=0.1, height=0.1)
+
+# It works better with the "other" column:
+lmm_lpa_other <- coeffs$other %>%
+  single_imputation() %>%
+  estimate_profiles(3)
+
+lmm_lpa_otherclass <- get_data(lmm_lpa_other)$Class %>%
+  factor()
+
+ggplot(lca_tend, aes(fb_tend, lr_tend, color=lmm_lpa_otherclass))+
+  geom_jitter(width=0.1, height=0.1)
+
+## 6.5 Summary
+
+# The "sum" grouping does not account for FB and LR differences that are definitely
+# present in the data. The "other" grouping shows the pattern we have already
+# observed and that is natural to interpret
+
+
+#### 7 Bayesian Linear Mixed Effect Models
+
+
+
