@@ -5,6 +5,7 @@
 
 
 library(ggplot2)
+library(MASS)
 library(poLCA)
 #install.packages("poLCA", dependencies = TRUE)
 library(gridExtra)
@@ -117,15 +118,15 @@ nrow(lr_p)
 
 # Numbers of different and same perspective trials in total
 clean %>%
-  count(perspective)
+  dplyr::count(perspective)
 
 # subjects and the number of total FB trails
 worker_fb <- clean %>%
   filter(perspective == "same", targetPos == "F" | targetPos == "B") %>%
-  count(workerID)
+  dplyr::count(workerID)
 # subjects and the number of errors they made in same perspective FB trails
 worker_fb_p <- fb_p %>%
-  count(workerID, sort = TRUE) 
+  dplyr::count(workerID, sort = TRUE) 
 
 # Workers and the proportion of errors they made in FB trails
 diff <- left_join(worker_fb_p, worker_fb, by="workerID", suffix=c("_p", "_all"))
@@ -335,7 +336,6 @@ ggplot(df_LPA_classes, aes(fb_tend, lr_tend, color=class_4))+
 # The classes of individual differences don't provide a good 
 # clustering. Based on the weak correlations this is no surprise.
 
-
 #### 5 LCA for perspective preference
 
 # 5.1 transforming data to fit LCA
@@ -394,7 +394,7 @@ bics <- append(bics, paste("Classes:",x, "BIC:", lca_x))
 # 3 Class model with the best BIC
 bics
 # printing output and graph
-lca_3 <- poLCA(f, df.LCA, nclass = 3, nrep = 50, graphs = TRUE) 
+lca_3 <- poLCA(f, df.LCA, nclass = 5, nrep = 50, graphs = TRUE) 
 
 
 ## 5.3 Applying LCA classes to tendency plots
@@ -425,6 +425,16 @@ ggplot(lca_tend, aes(fb_tend, lr_tend, color=responderType))+
 # othercentrics. This makes it harder to interpret the classes as egocentric,
 # othercentric and mixed responders. 
 
+
+## Interlude for data_gen
+# proportion of tendencies
+df %>%
+  dplyr::filter(workerID %in% tasks_comp$workerID)%>%
+  count(fb_tend)
+
+df %>%
+  dplyr::filter(workerID %in% tasks_comp$workerID)%>%
+  count(lr_tend)
 
 #### 6 LMEM
 
@@ -487,7 +497,38 @@ coeffs$other %>%
   plot_profiles()
 
 
-## 6.4 Results
+## 6.4 Applying LPA on the random slopes coefficients to find classes
+
+coeffs %>%
+  dplyr::select(F, B, L, R) %>%
+  single_imputation() %>%
+  estimate_profiles(1:9)%>% 
+  compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik"))
+
+lpa_bflr_cl_5_mod <-coeffs %>%
+  dplyr::select(F, B, L, R) %>%
+  single_imputation() %>%
+  estimate_profiles(5)
+
+lpa_bflr_cl_5 <- get_data(lpa_bflr_cl_5_mod)$Class %>%
+  factor()
+
+ggplot(lca_tend, aes(fb_tend, lr_tend, color=lpa_bflr_cl_5))+
+  geom_jitter(width=0.1, height=0.1)
+
+# FB and LR aggregated
+
+lpa_FL_cl_5_mod <-coeffs %>%
+  dplyr::select(FB, LR) %>%
+  single_imputation() %>%
+  estimate_profiles(3) 
+
+lpa_FL_cl_5 <- get_data(lpa_FL_cl_5_mod)$Class %>%
+  factor()
+
+ggplot(lca_tend, aes(fb_tend, lr_tend, color=lpa_FL_cl_5))+
+  geom_jitter(width=0.1, height=0.1)
+
 
 # When the plot uses the new classes for "sum", the interpretation becomes
 # difficult.
@@ -504,7 +545,7 @@ ggplot(lca_tend, aes(fb_tend, lr_tend, color=lmm_lpa_sumclass))+
 # It works better with the "other" column:
 lmm_lpa_other <- coeffs$other %>%
   single_imputation() %>%
-  estimate_profiles(3)
+  estimate_profiles(3) 
 
 lmm_lpa_otherclass <- get_data(lmm_lpa_other)$Class %>%
   factor()
@@ -520,6 +561,66 @@ ggplot(lca_tend, aes(fb_tend, lr_tend, color=lmm_lpa_otherclass))+
 
 
 #### 7 Bayesian Linear Mixed Effect Models
+library(brms)
+library(yaml)
+#install.packages("tidypredict")
+library(tidypredict)
+
+# 7.1 Specifying the BMEM
+# Adjust the chains and cores with respect to your hardware.
+
+#prior(lkj_corr_cholesky(1.5), class = cor)
+bmem4 <- brm(data = lmem_dat,
+                      family = bernoulli(),
+                      other.cod ~ 1 + targetPos + (1 + targetPos | workerID),
+                      prior = c(prior(normal(0, 1), class = Intercept),
+                                prior(normal(0, 1), class = b),
+                                prior(cauchy(0, 1), class = sd)
+                                ),
+                      iter = 8000, warmup = 2000, chains = 4, cores = 4,
+                      control = list(adapt_delta = .975, max_treedepth = 20),
+                      seed = 123,
+             file = "m4_fit")
 
 
 
+
+
+
+
+
+
+load(file="my_fit.rds")
+t1 <- readRDS("./my_fit.rda.rds")
+
+bmem0
+t1
+print(bmem0)
+print(bmem0)
+bmcoeff <- coef(bmem4)$workerID
+bmcoeff
+head(bmcoeff)
+bmcoeff[1:124,1,1:4]
+# install.packages("rstan", repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
+coeffs <- coeffs %>%
+  mutate("B_bmr" = bmcoeff[1:124,1,1]) %>%
+  mutate("F_bmr" = bmcoeff[1:124,1,1] + bmcoeff[1:124,1,2]) %>%
+  mutate("L_bmr" = bmcoeff[1:124,1,1] + bmcoeff[1:124,1,3]) %>%
+  mutate("R_bmr" = bmcoeff[1:124,1,1] + bmcoeff[1:124,1,4])
+
+
+lpa_bflr_cl_5_mod_bmr <-coeffs %>%
+  dplyr::select(F, B, L, R) %>%
+  single_imputation() %>%
+  estimate_profiles(3)
+
+lpa_bflr_cl_5_bmr <- get_data(lpa_bflr_cl_5_mod_bmr)$Class %>%
+  factor()
+
+ggplot(lca_tend, aes(fb_tend, lr_tend, color=lpa_bflr_cl_5_bmr))+
+  geom_jitter(width=0.1, height=0.1)
+
+cor(coeffs$B,coeffs$B_bmr)
+cor(coeffs$F,coeffs$F_bmr)
+cor(coeffs$L,coeffs$L_bmr)
+cor(coeffs$R,coeffs$R_bmr)
