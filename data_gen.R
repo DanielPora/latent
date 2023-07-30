@@ -1,5 +1,11 @@
 library(dplyr)
 library(ggplot2)
+library(rstudioapi)
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+#################
+# Functions
+#
+#
 
 
 make_subj <- function(class, obs_per_trial) {
@@ -17,41 +23,54 @@ make_subj <- function(class, obs_per_trial) {
   # the probability that a subject uses a egocentric perspective for a trial
   
   # type probabilities with individual difference
-  diff <- rnorm(1,0,0.05)
-  none <- ifelse(diff<0, 0 ,diff)
-  low <- ifelse(0.25+diff<0, 0, 0.25+diff)
-  mid <- 0.5+diff
-  high <- ifelse(0.75+diff>1, 1, 0.75+diff)
-  full <- ifelse(diff>1, 1, diff)
+  diff_FB <- rnorm(1,0,0.05)
+  diff_LR <- rnorm(1,0,0.05)
+  
+  FB_none <- ifelse(diff_FB<0, 0 ,diff_FB)
+  FB_low <- ifelse(0.25+diff_FB<0, 0, 0.25+diff_FB)
+  FB_mid <- 0.5+diff_FB
+  FB_high <- ifelse(0.75+diff_FB>1, 1, 0.75+diff_FB)
+  FB_full <- ifelse(diff_FB+1>1, 1, 1+diff_FB)
+  
+  LR_none <- ifelse(diff_LR<0, 0 ,diff_LR)
+  LR_low <- ifelse(0.25+diff_LR<0, 0, 0.25+diff_LR)
+  LR_mid <- 0.5+diff_LR
+  LR_high <- ifelse(0.75+diff_LR>1, 1, 0.75+diff_LR)
+  LR_full <- ifelse(diff_LR+1>1, 1, 1+diff_LR)
   
   # this results in 25 possible combination of classes
   class_prob <- 
-    list(c(full, none), c(full, low), c(full, mid), c(full, high), c(full, full),
-         c(high,none),  c(high, low), c(high, mid), c(high, high), c(high, full),
-         c(mid,none),   c(mid, low),  c(mid, mid),  c(mid, high),  c(mid, full),
-         c(low, none),  c(low, low),  c(low, mid),  c(low, high),  c(low, full),
-         c(none, none), c(none, low), c(none, mid), c(none, high), c(none, full))
+    list(c(FB_full, LR_none), c(FB_full, LR_low), c(FB_full, LR_mid), c(FB_full, LR_high), c(FB_full, LR_full),
+         c(FB_high,LR_none),  c(FB_high, LR_low), c(FB_high, LR_mid), c(FB_high, LR_high), c(FB_high, LR_full),
+         c(FB_mid,LR_none),   c(FB_mid, LR_low),  c(FB_mid, LR_mid),  c(FB_mid, LR_high),  c(FB_mid, LR_full),
+         c(FB_low, LR_none),  c(FB_low, LR_low),  c(FB_low, LR_mid),  c(FB_low, LR_high),  c(FB_low, LR_full),
+         c(FB_none, LR_none), c(FB_none, LR_low), c(FB_none, LR_mid), c(FB_none, LR_high), c(FB_none, LR_full))
 
   subj <- c()
   nam <- c()
+  true_FB <- class_prob[[class]][1]
+  true_LR <- class_prob[[class]][2]
+  
   for (pos in c('B', 'F', 'L', 'R')){
-    p1 <- class_prob[[class]][1]
-    p2 <- class_prob[[class]][2]
-    prob <- ifelse(pos == 'B' | pos == 'F', p1, p2)
+    prob <- ifelse(pos == 'B' | pos == 'F', true_FB, true_LR)
     for (i in 1:obs_per_trial){
       vec <- rbinom(1, 1,prob)
       nam <- cbind(nam, paste(pos,i,sep = ""))
       subj <- cbind(subj,vec)
     }
   }
+  
   subj <- cbind(subj, class)
-  subj <- cbind(subj, diff)
+  subj <- cbind(subj, true_FB)
+  subj <- cbind(subj, true_LR)
   nam <- cbind(nam, 'true_class')
-  nam <- cbind(nam, 'diff')
+  nam <- cbind(nam, 'true_FB')
+  nam <- cbind(nam, 'true_LR')
   colnames(subj)<- nam
   
   return(subj)
-}
+  }
+  
 
 gen_data <- function(size, obs_per_trial, c_dist){
   # generate the data with given parameters and adds a column true class
@@ -77,6 +96,10 @@ gen_data <- function(size, obs_per_trial, c_dist){
   df$true_class <- factor(df$true_class)  
     return(df)
 }
+#
+#
+############
+
 
 # The classes should also vary in size and in some cases they are not present at all.
 # Class distribution reflects the proportion or size of the classes in the population
@@ -99,18 +122,18 @@ gen_data <- function(size, obs_per_trial, c_dist){
 # 
 # Trying to recreate the class sizes from the experiment
 #                
-class_dist <- c( 20,  4,  0,  3, 30,
-                 4,  1,  0,  0,  0,
-                 0,  0,  1,  0,  0,
-                 5,  0,  0,  1,  0,
-                 25,  2,  0,  0,  1)
+class_dist <- c( 0,  0,  1,  0,  0,
+                 0,  0,  0,  0,  0,
+                 1,  0,  1,  0,  1,
+                 0,  0,  0,  0,  0,
+                 0,  0,  1,  0,  0)
 
 # number of classes
 sum(class_dist != 0)
 
 # generate the data with numbers from the experiment
 n_subjects = 150
-obs_per_trial = 2
+obs_per_trial = 20
 
 test_df <- gen_data(n_subjects, obs_per_trial, class_dist)
 # columns explained:
@@ -127,6 +150,13 @@ ggplot(test_df, aes(LR.tend,FB.tend, color=true_class)) +
   geom_jitter(width=0.05, height=0.05)+
   xlim(-0.1,1.1)+
   ylim(-0.1,1.1)
+
+ggplot(test_df, aes(shape = true_class))+
+  geom_point(aes(LR.tend, FB.tend, color = 'Generated (Point)'), width=0.03, height=0.03)+
+  geom_point(aes(true_LR,true_FB, color = 'True Probabilities'))+
+  labs(title = '20 Observations per trial')
+
+  
 
 
 ######
@@ -199,7 +229,8 @@ n_subjects_sc = 200 # number of subjects for the scenarios
 obs_per_trial_sc <- 2 # number of obs. per trial for the scenarios
 
 # Easy scenarios with increasing difficulty
-## Subjects have very clear tendencies, cluster centroids far apart, few classes
+## Subjects have clear tendencies, cluster centroids far apart, 3-4 classes,
+## same class sizes
 
 # Easy_1
 sc_name <- 'Easy_1'
@@ -211,7 +242,19 @@ class_dist_easy_1 <-
      1,  0,  0,  0,  1)
 
 data_easy_1 <- gen_data(n_subjects_sc, obs_per_trial_sc, class_dist_easy_1)
-ggplot(data_sc1, aes(LR.tend,FB.tend, color=true_class)) +
+ggplot(data_easy_1, aes(LR.tend,FB.tend, color=true_class)) +
+  geom_jitter(width=0.03, height=0.03)+
+  xlim(-0.1,1.1)+
+  ylim(-0.1,1.1)+
+  labs(title = sc_name)
+
+write.csv(data_easy_1, "./data_easy_1.csv", row.names=FALSE)
+
+data1 <- read.csv("./data_easy_1.csv", header=TRUE, stringsAsFactors=TRUE)
+data1
+
+
+ggplot(data1, aes(LR.tend,FB.tend, color=true_class)) +
   geom_jitter(width=0.03, height=0.03)+
   xlim(-0.1,1.1)+
   ylim(-0.1,1.1)+
@@ -220,9 +263,9 @@ ggplot(data_sc1, aes(LR.tend,FB.tend, color=true_class)) +
 # Easy_2
 sc_name <- 'Easy_2'
 class_dist_easy_2 <-
-  c( 1,  0,  0,  0,  0,
-     0,  0,  0,  0,  0,
+  c( 0,  1,  0,  0,  0,
      0,  0,  0,  0,  1,
+     0,  0,  0,  0,  0,
      0,  0,  0,  0,  0,
      0,  1,  0,  0,  0)
 
@@ -250,6 +293,53 @@ ggplot(data_easy_3, aes(LR.tend,FB.tend, color=true_class)) +
   labs(title = sc_name)
 
 # Medium scenarios
+## Subjects have mixed tendencies, cluster centroids are sometimes near,
+## 4-5 classes, same class sizes 
+
+# medium_1
+sc_name <- 'Medium_1'
+class_dist_medium_1 <-
+  c( 0,  1,  0,  0,  1,
+     0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,
+     0,  1,  0,  0,  1,
+     0,  0,  1,  0,  0)
+
+data_medium_1 <- gen_data(n_subjects_sc, obs_per_trial_sc, class_dist_medium_1)
+ggplot(data_medium_1, aes(LR.tend,FB.tend, color=true_class)) +
+  geom_jitter(width=0.03, height=0.03)+
+  xlim(-0.1,1.1)+
+  ylim(-0.1,1.1)+
+  labs(title = sc_name)
+
+# medium_2
+sc_name <- 'Medium_2'
+class_dist_medium_2 <-
+  c( 0,  1,  0,  0,  1,
+     1,  0,  0,  1,  0,
+     0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,
+     1,  0,  1,  0,  1)
+
+data_medium_2 <- gen_data(n_subjects_sc, obs_per_trial_sc, class_dist_medium_2)
+ggplot(data_medium_2, aes(LR.tend,FB.tend, color=true_class)) +
+  geom_jitter(width=0.03, height=0.03)+
+  xlim(-0.1,1.1)+
+  ylim(-0.1,1.1)+
+  labs(title = sc_name)
 
 
+# all
+sc_name <- 'All Classes'
+class_dist_medium_2 <-
+  c( 1,  1,  1,  1,  1,
+     1,  1,  1,  1,  1,
+     1,  1,  1,  1,  1,
+     1,  1,  1,  1,  1,
+     1,  1,  1,  1,  1)
 
+data_medium_2 <- gen_data(n_subjects_sc, obs_per_trial_sc, class_dist_medium_2)
+ggplot(data_medium_2, aes(LR.tend,FB.tend, color=true_class)) +
+  geom_point(width=0.03, height=0.03)+
+
+  labs(title = sc_name)

@@ -248,17 +248,17 @@ df <- data.frame('workerID' =by_subj_lr$workerID,'fb_tend'=by_subj_fb$own_tenden
 # We can see 3 main clusters -1/-1(pure othercentrics), -1/1(lr egocentrics) and 
 # 1/1(pure egocentrics), highlighting that FB and LR perspective preference is
 # not symmetrical, since there is no 1/-1 cluster.
-ggplot(df, aes(fb_tend, lr_tend, color=aq))+
+ggplot(df, aes(lr_tend,fb_tend, color=aq))+
   geom_jitter(width=0.1, height=0.1)+
   scale_colour_gradientn(colours=rainbow(4))
-ggplot(df, aes(fb_tend, lr_tend, color=stroop))+
+ggplot(df, aes(lr_tend,fb_tend, color=stroop))+
   geom_jitter(width=0.1, height=0.1)+
   scale_colour_gradientn(colours=rainbow(4))
 # Visually there does not seem to be a correlation to AQ and Stroop scores
 # on their own.
 
 # With OPT score on the other hand:
-ggplot(df, aes(fb_tend, lr_tend, color=opt))+
+ggplot(df, aes( lr_tend,fb_tend, color=opt))+
   geom_jitter(width=0.1, height=0.1)+
   scale_colour_gradientn(colours=rainbow(4))
 # Visually we get ideas about the distribution of OPT scores and tendencies.
@@ -322,15 +322,15 @@ df_LPA_classes <- df %>%
   mutate('class_2' = classes_2, 'class_3'=classes_3, 'class_4'=classes_4)
   
 # 2 classes plot, resembles tendencies plot from 4.1
-ggplot(df_LPA_classes, aes(fb_tend, lr_tend, color=class_2))+
+ggplot(df_LPA_classes, aes( lr_tend,fb_tend, color=class_2))+
   geom_jitter(width=0.1, height=0.1)
 
 # 3 classes plot
-ggplot(df_LPA_classes, aes(fb_tend, lr_tend, color=class_3))+
+ggplot(df_LPA_classes, aes( lr_tend,fb_tend, color=class_3))+
   geom_jitter(width=0.1, height=0.1)
 
 # 4 classes plot
-ggplot(df_LPA_classes, aes(fb_tend, lr_tend, color=class_4))+
+ggplot(df_LPA_classes, aes( lr_tend,fb_tend, color=class_4))+
   geom_jitter(width=0.1, height=0.1)
 
 # The classes of individual differences don't provide a good 
@@ -363,7 +363,7 @@ tasks_comp <- count(trails_diff, workerID, sort=TRUE) %>%
 
 trails_comp <- trails_diff %>%
   filter(workerID %in% tasks_comp$workerID) %>%
-  dplyr::select(workerID, targetPos, other.cod)
+  dplyr::select(workerID, targetPos, own.cod)
 
 # make sure every targetPos has 2 entries for each subject
 trails_comp %>%
@@ -376,7 +376,7 @@ tc_ordered <- trails_comp[with(trails_comp, order(workerID, targetPos)), ]
 # extend to wide format and naming accordingly
 data_with_index <- ddply(tc_ordered, .(workerID), mutate, 
                          index = c('B1','B2','F1','F2','L1','L2','R1','R2')[1:length(workerID)])
-df.LCA_id <- dcast(data_with_index, workerID ~ index, value.var = 'other.cod')
+df.LCA_id <- dcast(data_with_index, workerID ~ index, value.var = 'own.cod')
 # for poLCA we will need only the value column and no zero or negative values
 df.LCA <- df.LCA_id %>% 
   dplyr::select(-workerID)
@@ -394,7 +394,7 @@ bics <- append(bics, paste("Classes:",x, "BIC:", lca_x))
 # 3 Class model with the best BIC
 bics
 # printing output and graph
-lca_3 <- poLCA(f, df.LCA, nclass = 5, nrep = 50, graphs = TRUE) 
+lca_3 <- poLCA(f, df.LCA, nclass = 3, nrep = 50, graphs = TRUE) 
 
 
 ## 5.3 Applying LCA classes to tendency plots
@@ -414,11 +414,11 @@ lca_tend <- df %>%
   merge(responders, by='workerID', all.x=TRUE)
 
 # LCA could retrieve the tendencies ...
-ggplot(lca_tend, aes(fb_tend, lr_tend, color=lca.class))+
+ggplot(lca_tend, aes(lr_tend, fb_tend, color=lca.class))+
   geom_jitter(width=0.1, height=0.1)
 # and it matches almost to the clusters in LPA for rate of egocentrism
 # from the experiment paper
-ggplot(lca_tend, aes(fb_tend, lr_tend, color=responderType))+
+ggplot(lca_tend, aes( lr_tend,fb_tend, color=responderType))+
   geom_jitter(width=0.1, height=0.1)
 
 # LCA classifies 4 outlier mixed responders differently and allocates them to
@@ -470,11 +470,11 @@ coeffs$other = (coeffs$FB+coeffs$LR)/2
 
 # simple classification into 3 classes. [0, .25] Class 0 ; (.25, .75] class 1 ; >.75 class 2
 # Drawback: the number of classes are not automatically determined.
-coeffs$class = ifelse(coeffs$other > 0.25, ifelse(coeffs$other > 0.75, 2, 1), 0)
-coeffs$class <- factor(coeffs$class)
-ggplot(lca_tend, aes(fb_tend, lr_tend, color=coeffs$class))+
+hist(coeffs$other)
+coeffs$naive_class = ifelse(coeffs$other > 0.25, ifelse(coeffs$other > 0.6, 2, 1), 0)
+coeffs$naive_class <- factor(coeffs$naive_class)
+ggplot(lca_tend, aes( lr_tend,fb_tend, color=coeffs$naive_class))+
   geom_jitter(width=0.1, height=0.1)
-
 
 ## 6.3. Histograms and sum-approach
 # Maybe just adding up everything also give es good classification basis
@@ -483,7 +483,7 @@ coeffs$sum <- coeffs$sum -min(coeffs$sum)
 coeffs$sum <- coeffs$sum/max(coeffs$sum)
 # Histograms show tri-modal distribution
 hist(coeffs$sum)
-hist(coeffs$other)
+
 # LPA on the "sum" or "other" column or  with 3 classes gives a nice separation,
 # but with an important difference:
 coeffs$sum %>%
@@ -494,7 +494,7 @@ single_imputation() %>%
 coeffs$other %>%
   single_imputation() %>%
   estimate_profiles(3)%>% 
-  plot_profiles()
+  plot_profiles(alpha_range = c(0.5, 0.5))
 
 
 ## 6.4 Applying LPA on the random slopes coefficients to find classes
@@ -513,20 +513,26 @@ lpa_bflr_cl_5_mod <-coeffs %>%
 lpa_bflr_cl_5 <- get_data(lpa_bflr_cl_5_mod)$Class %>%
   factor()
 
-ggplot(lca_tend, aes(fb_tend, lr_tend, color=lpa_bflr_cl_5))+
+ggplot(lca_tend, aes( lr_tend,fb_tend, color=lpa_bflr_cl_5))+
   geom_jitter(width=0.1, height=0.1)
 
 # FB and LR aggregated
 
+coeffs %>%
+  dplyr::select(FB, LR) %>%
+  single_imputation() %>%
+  estimate_profiles(1:9)%>% 
+  compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik")) 
+
 lpa_FL_cl_5_mod <-coeffs %>%
   dplyr::select(FB, LR) %>%
   single_imputation() %>%
-  estimate_profiles(3) 
+  estimate_profiles(6)
 
 lpa_FL_cl_5 <- get_data(lpa_FL_cl_5_mod)$Class %>%
   factor()
 
-ggplot(lca_tend, aes(fb_tend, lr_tend, color=lpa_FL_cl_5))+
+ggplot(lca_tend, aes( lr_tend,fb_tend, color=lpa_FL_cl_5))+
   geom_jitter(width=0.1, height=0.1)
 
 
@@ -539,18 +545,27 @@ lmm_lpa_sum <- coeffs$sum %>%
 lmm_lpa_sumclass <- get_data(lmm_lpa_sum)$Class %>%
   factor()
 
-ggplot(lca_tend, aes(fb_tend, lr_tend, color=lmm_lpa_sumclass))+
+ggplot(lca_tend, aes( lr_tend, fb_tend,color=lmm_lpa_sumclass))+
   geom_jitter(width=0.1, height=0.1)
 
 # It works better with the "other" column:
-lmm_lpa_other <- coeffs$other %>%
+coeffs$other %>%
   single_imputation() %>%
-  estimate_profiles(3) 
+  estimate_profiles(3) %>%
+  plot_profiles(alpha_range = c(0.1, 1))
+
+lmm_lpa_other <- 
+  coeffs$other %>%
+  single_imputation() %>%
+  estimate_profiles(3)
 
 lmm_lpa_otherclass <- get_data(lmm_lpa_other)$Class %>%
   factor()
 
-ggplot(lca_tend, aes(fb_tend, lr_tend, color=lmm_lpa_otherclass))+
+coeffs$other_lpaclass <- get_data(lmm_lpa_other)$Class %>%
+  factor()
+
+ggplot(lca_tend, aes(lr_tend, fb_tend, color=coeffs$other_lpaclass))+
   geom_jitter(width=0.1, height=0.1)
 
 ## 6.5 Summary
@@ -583,13 +598,6 @@ bmem4 <- brm(data = lmem_dat,
              file = "m4_fit")
 
 
-
-
-
-
-
-
-
 load(file="my_fit.rds")
 t1 <- readRDS("./my_fit.rda.rds")
 
@@ -617,7 +625,7 @@ lpa_bflr_cl_5_mod_bmr <-coeffs %>%
 lpa_bflr_cl_5_bmr <- get_data(lpa_bflr_cl_5_mod_bmr)$Class %>%
   factor()
 
-ggplot(lca_tend, aes(fb_tend, lr_tend, color=lpa_bflr_cl_5_bmr))+
+ggplot(lca_tend, aes(lr_tend,fb_tend,  color=lpa_bflr_cl_5_bmr))+
   geom_jitter(width=0.1, height=0.1)
 
 cor(coeffs$B,coeffs$B_bmr)
