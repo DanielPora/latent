@@ -357,7 +357,7 @@ count(trails_diff, workerID, sort=TRUE)
 
 
 # filtering only workers who completed all 8 tasks
-tasks_comp <- count(trails_diff, workerID, sort=TRUE) %>%
+tasks_comp <- dplyr::count(trails_diff, workerID, sort=TRUE) %>%
   filter(n==8)%>%
   dplyr::select(workerID)
 
@@ -368,7 +368,7 @@ trails_comp <- trails_diff %>%
 # make sure every targetPos has 2 entries for each subject
 trails_comp %>%
   group_by(workerID) %>%
-  count(targetPos) %>%
+  dplyr::count(targetPos) %>%
   filter(n != 2)
 
 # order by workerID and then tragetPos
@@ -385,7 +385,9 @@ df.LCA <- df.LCA+1
 
 ## 5.2 Applying LCA with poLCA
 
-f <- with(df.LCA, cbind(B1, B2, F1, F2, L1, L2, R1, R2)~1)
+  
+f <- with(df.LCA , cbind(B1, B2, F1, F2, L1, L2, R1, R2)~1)
+
 bics <- c()
 for (x in 1:8) {
 lca_x <- poLCA(f, df.LCA, nclass = x, nrep = 10, verbose=FALSE)$bic 

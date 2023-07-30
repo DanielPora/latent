@@ -248,17 +248,7 @@ ggplot(data_easy_1, aes(LR.tend,FB.tend, color=true_class)) +
   ylim(-0.1,1.1)+
   labs(title = sc_name)
 
-write.csv(data_easy_1, "./data_easy_1.csv", row.names=FALSE)
-
-data1 <- read.csv("./data_easy_1.csv", header=TRUE, stringsAsFactors=TRUE)
-data1
-
-
-ggplot(data1, aes(LR.tend,FB.tend, color=true_class)) +
-  geom_jitter(width=0.03, height=0.03)+
-  xlim(-0.1,1.1)+
-  ylim(-0.1,1.1)+
-  labs(title = sc_name)
+write.csv(data_easy_1, paste("./data_",sc_name,".csv", sep=""), row.names=FALSE)
 
 # Easy_2
 sc_name <- 'Easy_2'
@@ -276,6 +266,8 @@ ggplot(data_easy_2, aes(LR.tend,FB.tend, color=true_class)) +
   ylim(-0.1,1.1)+
   labs(title = sc_name)
 
+write.csv(data_easy_2, paste("./data_",sc_name,".csv", sep=""), row.names=FALSE)
+
 # Easy_3
 sc_name <- 'Easy_3'
 class_dist_easy_3 <-
@@ -291,6 +283,8 @@ ggplot(data_easy_3, aes(LR.tend,FB.tend, color=true_class)) +
   xlim(-0.1,1.1)+
   ylim(-0.1,1.1)+
   labs(title = sc_name)
+
+write.csv(data_easy_3, paste("./data_",sc_name,".csv", sep=""), row.names=FALSE)
 
 # Medium scenarios
 ## Subjects have mixed tendencies, cluster centroids are sometimes near,
@@ -312,6 +306,8 @@ ggplot(data_medium_1, aes(LR.tend,FB.tend, color=true_class)) +
   ylim(-0.1,1.1)+
   labs(title = sc_name)
 
+write.csv(data_medium_1, paste("./data_",sc_name,".csv", sep=""), row.names=FALSE)
+
 # medium_2
 sc_name <- 'Medium_2'
 class_dist_medium_2 <-
@@ -328,18 +324,78 @@ ggplot(data_medium_2, aes(LR.tend,FB.tend, color=true_class)) +
   ylim(-0.1,1.1)+
   labs(title = sc_name)
 
+write.csv(data_medium_2, paste("./data_",sc_name,".csv", sep=""), row.names=FALSE)
 
-# all
-sc_name <- 'All Classes'
-class_dist_medium_2 <-
-  c( 1,  1,  1,  1,  1,
-     1,  1,  1,  1,  1,
-     1,  1,  1,  1,  1,
-     1,  1,  1,  1,  1,
-     1,  1,  1,  1,  1)
+#
+#
+##############
+#            #
+# Evaluation #
+#            #
+##############
+library(fossil)
+#install.packages("fossil")
+library(poLCA)
+#####
+#
+# Function
 
-data_medium_2 <- gen_data(n_subjects_sc, obs_per_trial_sc, class_dist_medium_2)
-ggplot(data_medium_2, aes(LR.tend,FB.tend, color=true_class)) +
-  geom_point(width=0.03, height=0.03)+
+eval_lca <- function(df){
+  
+  lca_data1 <- df
+  for (col in 1:ncol(lca_data1)){
+    if(colnames(lca_data1[col]) == "true_class") {break}
+    lca_data1[col] <- lca_data1[col] + 1
+  }
+  
+  f <- with(lca_data1, cbind(B1, B2, F1, F2, L1, L2, R1, R2)~1)
+  bics <- c()
+  bics_num <- c()
+  best_bic <- Inf
+  for (x in 1:8) {
+    lca_x <- poLCA(f, lca_data1, nclass = x, nrep = 10, verbose=FALSE)$bic 
+    bics_num <- append(bics_num, lca_x)
+    bics <- append(bics, paste("Classes:",x, "BIC:", lca_x))
+    ifelse(best_bic > lca_x, best_bic <- lca_x, break)
+  }
+  
+  bic_class <- which.min(bics_num)
+  
+  
+  lca_data1_res <- poLCA(f, lca_data1, nclass = bic_class, nrep = 50, graphs = FALSE, verbose=FALSE) 
+  
+  df <- df %>%
+    mutate('lca.class' = factor(lca_data1_res$predclass))
+  
+  ggpl <- ggplot(df, aes(LR.tend, FB.tend, color = lca.class))+
+    geom_jitter()
+  print(ggpl)
+  # Sys.sleep(0.5)
+  
+  rand.index(as.numeric(df$true_class), as.numeric(df$lca.class))
+}
 
-  labs(title = sc_name)
+
+n_subjects_ev = 200 # number of subjects for the scenarios
+obs_per_trial_ev <- 2 # number of obs. per trial for the scenarios
+
+for (n_subjects_ev in c(200,400,800)){
+vals <- c()
+for (i in 1:5){
+  g_data <- gen_data(n_subjects_ev, obs_per_trial_ev, class_dist_medium_2)
+  lca_rand <- eval_lca(g_data)
+  vals <- append(vals, lca_rand)
+}
+print(paste(n_subjects_ev, mean(vals)))
+}
+
+n_subjects_ev = 200
+for (obs_per_trial_ev in c(2,4,8)){
+  vals <- c()
+  for (i in 1:5){
+    g_data <- gen_data(n_subjects_ev, obs_per_trial_ev, class_dist_medium_2)
+    lca_rand <- eval_lca(g_data)
+    vals <- append(vals, lca_rand)
+  }
+  print(paste(obs_per_trial_ev, mean(vals)))
+}
