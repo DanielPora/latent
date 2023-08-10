@@ -15,10 +15,11 @@ library(data.table)
 library(plyr)
 library(dplyr)
 library(lme4)
+?lme4
 library(rstudioapi)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 ##########################################################################
-
+?dcast
 # read data
 dat_tar <- read.csv("data_s3_target.csv")
 dat_id <- read.csv("data_s3_ID.csv")
@@ -130,9 +131,9 @@ worker_fb_p <- fb_p %>%
 
 # Workers and the proportion of errors they made in FB trails
 diff <- left_join(worker_fb_p, worker_fb, by="workerID", suffix=c("_p", "_all"))
-diff %>%
+(diff <- diff %>%
   mutate(prop = round(n_p/n_all,2))%>%
-  arrange(desc(prop))
+  arrange(desc(prop)))
 
 
 ## 2.2 Summary
@@ -145,7 +146,7 @@ diff %>%
 # did it systematically. Therefore it's suggested to invert the interpretation
 # for their own.cod and other.cod entries or remove them from the analysis.
 
-exclusions = diff$workerID
+exclusions <- diff$workerID
 clean_ex <- clean %>%
   filter(!(workerID %in% exclusions)) 
 # Leaving out 412 observations
@@ -355,6 +356,14 @@ count(trails_diff, workerID, sort=TRUE)
 # Subject  B1 B2 F1 F2 L1 L2 R1 R2
 # Q3AAKY3  1  1  1  1  2  2  2  2
 
+# Workers with one missing trial
+tasks_7comp <- dplyr::count(trails_diff, workerID, sort=TRUE) %>%
+  filter(n==7)%>%
+  dplyr::select(workerID)
+
+trails_diff %>%
+  filter(workerID %in% tasks_7comp$workerID) %>%
+  dplyr::select(workerID, targetPos, own.cod)
 
 # filtering only workers who completed all 8 tasks
 tasks_comp <- dplyr::count(trails_diff, workerID, sort=TRUE) %>%
@@ -447,8 +456,13 @@ df %>%
 # Such that the individual changes in reaction for the subjects are computed.
 lmem_dat <- trails_comp %>%
    mutate_if(is.character, as.factor)
-summary(m0 <- lmer(other.cod ~ targetPos + (targetPos | workerID), data=lmem_dat))
 
+summary(m0 <- lmer(own.cod ~ targetPos + (targetPos | workerID), data=lmem_dat))
+summary(m1 <- lmer(own.cod ~ targetPos + (1 | workerID), data=lmem_dat))
+
+
+
+summary(m0 <- glmer(own.cod ~ targetPos + (targetPos | workerID), data=lmem_dat, family = binomial()))
 
 ## 6.2 Grouping the coefficients
 # The slope coefficients, Back is the intercept, because of alphabetical ordering
@@ -460,7 +474,6 @@ coeffs$F <- coeffs$`(Intercept)`+coeffs$targetPosF
 coeffs$B <- coeffs$`(Intercept)`
 coeffs$L <- coeffs$`(Intercept)`+coeffs$targetPosL
 coeffs$R <- coeffs$`(Intercept)`+coeffs$targetPosR
-coeffs
 
 # Grouping to FB and LR by taking the mean of the components
 coeffs$FB <- (coeffs$F+coeffs$B)/2
@@ -491,58 +504,79 @@ hist(coeffs$sum)
 coeffs$sum %>%
 single_imputation() %>%
   estimate_profiles(3)%>% 
-  plot_profiles()
+  plot_profiles(alpha_range = c(0, 0.6))
 
 coeffs$other %>%
   single_imputation() %>%
   estimate_profiles(3)%>% 
-  plot_profiles(alpha_range = c(0.5, 0.5))
+  plot_profiles(alpha_range = c(0, 0.6))
 
 
+### plot for seminar
+
+require(lattice)
+qqmath(ranef(m1, condVar=TRUE))
+dotplot(ranef(m1, condVar=TRUE))
 ## 6.4 Applying LPA on the random slopes coefficients to find classes
 
+
+# For separate targetPos, AHP suggests 3 classes which results in a bad FB-LR tend plot
 coeffs %>%
   dplyr::select(F, B, L, R) %>%
   single_imputation() %>%
-  estimate_profiles(1:9)%>% 
+  estimate_profiles(1:8)%>% 
   compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik"))
 
-lpa_bflr_cl_5_mod <-coeffs %>%
+lpa_bflr_cl_3_mod <-coeffs %>%
   dplyr::select(F, B, L, R) %>%
   single_imputation() %>%
-  estimate_profiles(5)
+  estimate_profiles(3)
 
-lpa_bflr_cl_5 <- get_data(lpa_bflr_cl_5_mod)$Class %>%
+lpa_bflr_cl_3 <- get_data(lpa_bflr_cl_3_mod)$Class %>%
   factor()
 
-ggplot(lca_tend, aes( lr_tend,fb_tend, color=lpa_bflr_cl_5))+
+ggplot(lca_tend, aes( lr_tend,fb_tend, color=lpa_bflr_cl_3))+
   geom_jitter(width=0.1, height=0.1)
 
-# FB and LR aggregated
+# FB and LR aggregated give a better repesentation for the plot
 
 coeffs %>%
   dplyr::select(FB, LR) %>%
   single_imputation() %>%
   estimate_profiles(1:9)%>% 
   compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik")) 
+# 7 classes with best BIC withour warning
+coeffs %>%
+  dplyr::select(FB, LR) %>%
+  single_imputation() %>%
+  estimate_profiles(6) %>%
+  plot_profiles(alpha_range = c(0, 0.6))
 
-lpa_FL_cl_5_mod <-coeffs %>%
+
+
+lpa_FL_cl_7_mod <-coeffs %>%
   dplyr::select(FB, LR) %>%
   single_imputation() %>%
   estimate_profiles(6)
 
-lpa_FL_cl_5 <- get_data(lpa_FL_cl_5_mod)$Class %>%
+lpa_FL_cl_7 <- get_data(lpa_FL_cl_7_mod)$Class %>%
   factor()
 
-ggplot(lca_tend, aes( lr_tend,fb_tend, color=lpa_FL_cl_5))+
+ggplot(lca_tend, aes(lr_tend,fb_tend, color=lpa_FL_cl_7))+
   geom_jitter(width=0.1, height=0.1)
 
 
 # When the plot uses the new classes for "sum", the interpretation becomes
-# difficult.
+# difficult. Lowest BIC without warning is 3 classes but AHP suggests only 1
+# Result for 3 ist very unintuative
+coeffs$sum %>%
+  single_imputation() %>%
+  estimate_profiles(1:8)%>% 
+  compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik"))
+
 lmm_lpa_sum <- coeffs$sum %>%
   single_imputation() %>%
-  estimate_profiles(3)
+  estimate_profiles(4)
 
 lmm_lpa_sumclass <- get_data(lmm_lpa_sum)$Class %>%
   factor()
@@ -551,15 +585,22 @@ ggplot(lca_tend, aes( lr_tend, fb_tend,color=lmm_lpa_sumclass))+
   geom_jitter(width=0.1, height=0.1)
 
 # It works better with the "other" column:
+# 4 is suggested but results in a class with only one subject
+# 3 and 5 are good alternatives
 coeffs$other %>%
   single_imputation() %>%
-  estimate_profiles(3) %>%
-  plot_profiles(alpha_range = c(0.1, 1))
+  estimate_profiles(1:10) %>%
+  compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik"))
+
+coeffs$other %>%
+  single_imputation() %>%
+  estimate_profiles(4) %>%  
+  plot_profiles(alpha_range = c(0, 0.6))
 
 lmm_lpa_other <- 
   coeffs$other %>%
   single_imputation() %>%
-  estimate_profiles(3)
+  estimate_profiles(5)
 
 lmm_lpa_otherclass <- get_data(lmm_lpa_other)$Class %>%
   factor()
@@ -579,39 +620,108 @@ ggplot(lca_tend, aes(lr_tend, fb_tend, color=coeffs$other_lpaclass))+
 
 #### 7 Bayesian Linear Mixed Effect Models
 library(brms)
+?brms
 library(yaml)
 #install.packages("tidypredict")
 library(tidypredict)
 
-# 7.1 Specifying the BMEM
-# Adjust the chains and cores with respect to your hardware.
+## 7.1 Specifying the BMEM
 
-#prior(lkj_corr_cholesky(1.5), class = cor)
-bmem4 <- brm(data = lmem_dat,
-                      family = bernoulli(),
-                      other.cod ~ 1 + targetPos + (1 + targetPos | workerID),
-                      prior = c(prior(normal(0, 1), class = Intercept),
-                                prior(normal(0, 1), class = b),
-                                prior(cauchy(0, 1), class = sd)
-                                ),
-                      iter = 8000, warmup = 2000, chains = 4, cores = 4,
-                      control = list(adapt_delta = .975, max_treedepth = 20),
-                      seed = 123,
-             file = "m4_fit")
+# trying uninformed
+uninformed <- 
+  brm(data = lmem_dat,
+  family = gaussian(),
+  own.cod ~ targetPos + (targetPos|workerID),
+  prior = c(prior(uniform(-20,20), class = Intercept),
+  prior(uniform(-5, 5), class = b),
+  prior(uniform(-2, 2), class = sigma)),
+  seed = 123,
+  iter = 4000, warmup = 2000, chains = 4, cores = 4,
+  file = "uninformed")
+plot(uninformed)
+summary(uninformed)
+
+# uninformed priors are too weak to let the model converge
+# what about normal priors with a little more insight 
+normal_priors <- 
+  brm(data = lmem_dat,
+      family = gaussian(),
+      own.cod ~ targetPos + (targetPos|workerID),
+      prior = c(prior(normal(-5, 5), class = Intercept),
+                prior(normal(-5, 5), class = b),
+                prior(normal(0, 1), class = sigma)),
+      seed = 123,
+      iter = 4000, warmup = 2000, chains = 4, cores = 4,
+      file = "normal_priors")
+plot(normal_priors)
+summary(normal_priors)
 
 
-load(file="my_fit.rds")
-t1 <- readRDS("./my_fit.rda.rds")
+principled <- 
+  brm(data = lmem_dat,
+      family = gaussian(),
+      own.cod ~ targetPos + (targetPos | workerID),
+      prior = c(prior(normal(0, 1), class = Intercept),
+                prior(normal(0, 1), class = b),
+                prior(cauchy(0, 1), class = sd)),
+      iter = 8000, warmup = 4000, chains = 4, cores = 8,
+      seed = 123,
+      file = "principled")
+plot(principled)
+summary(principled)
+pp_check(principled)
+#standard model
+bm0 <- brm(data = lmem_dat, own.cod ~ targetPos + (targetPos | workerID), cores = 8)
+summary(bm0)
+plot(bm0)
+#flat priors
+prior_summary(bm0)
+pp_check(bm0)
 
-bmem0
-t1
-print(bmem0)
-print(bmem0)
-bmcoeff <- coef(bmem4)$workerID
-bmcoeff
+bm1 <- brm(data = lmem_dat, own.cod ~ targetPos + (targetPos | workerID),
+           prior = c(prior(normal(0.5,3), class = Intercept),
+                     prior(normal(0,2), class = b),
+                     prior(normal(0, 1), class = sd)),
+           seed = 123,
+           cores = 8, iter = 4000, warmup = 2000)
+
+summary(bm1)
+pp_check(bm1, ndraws = 100)
+
+bm1_bernoulli <- brm(data = lmem_dat, own.cod ~ targetPos + (targetPos | workerID),
+           family = bernoulli(),
+           seed = 123,
+           cores = 8,
+           iter = 4000, warmup = 2000)
+
+summary(bm1_bernoulli)
+pp_check(bm1_bernoulli,ndraws = 100)
+plot(bm1_bernoulli)
+
+bm2_bernoulli <- brm(data = lmem_dat, own.cod ~ targetPos + (targetPos | workerID),
+            family = bernoulli(),
+            prior = c(prior(normal(0.5,3), class = Intercept),
+                      prior(normal(0,2), class = b),
+                      prior(normal(0, 1), class = sd)),
+            seed = 123,
+            cores = 8,
+            iter = 4000, warmup = 2000)
+
+summary(bm2_bernoulli)
+pp_check(bm2_bernoulli, ndraws = 100)
+plot(bm2_bernoulli)
+
+
+# loading a BMEM model
+# t1 <- readRDS("./m4_fit.rds")
+
+## 7.2 Extracting random slopes gaussian model
+
+bmcoeff <- coef(bm1)$workerID
 head(bmcoeff)
+
+
 bmcoeff[1:124,1,1:4]
-# install.packages("rstan", repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
 coeffs <- coeffs %>%
   mutate("B_bmr" = bmcoeff[1:124,1,1]) %>%
   mutate("F_bmr" = bmcoeff[1:124,1,1] + bmcoeff[1:124,1,2]) %>%
@@ -619,16 +729,162 @@ coeffs <- coeffs %>%
   mutate("R_bmr" = bmcoeff[1:124,1,1] + bmcoeff[1:124,1,4])
 
 
-lpa_bflr_cl_5_mod_bmr <-coeffs %>%
-  dplyr::select(F, B, L, R) %>%
-  single_imputation() %>%
-  estimate_profiles(3)
 
-lpa_bflr_cl_5_bmr <- get_data(lpa_bflr_cl_5_mod_bmr)$Class %>%
+
+
+## 7.3 Finding classes and variable transformation
+
+# LPA for BMRS with 4 Separate variables suggests 2 classes, 
+# which is very unfitting
+coeffs %>%
+  dplyr::select(F_bmr, B_bmr, L_bmr, R_bmr) %>%
+  single_imputation() %>%
+  estimate_profiles(2:9) %>%
+  compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik"))
+
+lpa_bflr_cl_2_mod_bmr <-coeffs %>%
+  dplyr::select(F_bmr, B_bmr, L_bmr, R_bmr) %>%
+  single_imputation() %>%
+  estimate_profiles(2)
+  
+lpa_bflr_cl_2_bmr <- get_data(lpa_bflr_cl_2_mod_bmr)$Class %>%
   factor()
 
-ggplot(lca_tend, aes(lr_tend,fb_tend,  color=lpa_bflr_cl_5_bmr))+
+ggplot(lca_tend, aes(lr_tend,fb_tend,  color=lpa_bflr_cl_2_bmr))+
   geom_jitter(width=0.1, height=0.1)
+
+# Summarizing to FB, LR and own
+coeffs <- coeffs %>%
+  mutate("FB_bmr" = (B_bmr+F_bmr)/2)%>%
+  mutate("LR_bmr" = (L_bmr+R_bmr)/2)%>%
+  mutate("own.bmr" = (FB_bmr+LR_bmr)/2)
+
+# the histogram reveals the possibility for 4 classes for the own.bmr variable
+hist(coeffs$own.bmr)
+
+# 5 classes has the lowest BIC and no warnings
+coeffs %>%
+  dplyr::select(own.bmr) %>%
+  single_imputation() %>%
+  estimate_profiles(1:10)%>%
+  compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik"))
+
+bmr.own.mod <- coeffs %>%
+  dplyr::select(own.bmr) %>%
+  single_imputation() %>%
+  estimate_profiles(5)
+
+bmr.own.class <- get_data(bmr.own.mod)$Class %>%
+  factor()
+
+hist(coeffs$own.bmr)
+
+ggplot(lca_tend, aes(lr_tend, fb_tend, color = bmr.own.class))+
+  geom_jitter(width=0.1, height=0.1)
+
+# For the fine grained FB-LR 3 classes are found
+coeffs %>%
+  dplyr::select(FB_bmr, LR_bmr) %>%
+  single_imputation() %>%
+  estimate_profiles(1:10)%>%
+  compare_solutions(statistics=c("AIC", "BIC","LogLik")) 
+
+bmr_classes_model_g <- coeffs %>%
+  dplyr::select(FB_bmr, LR_bmr) %>%
+  single_imputation() %>%
+  estimate_profiles(3) 
+
+bmr_classes_g <- get_data(bmr_classes_model_g)$Class %>%
+  factor()
+
+ggplot(lca_tend, aes(lr_tend, fb_tend, color = bmr_classes_g))+
+  geom_jitter(width=0.1, height=0.1)
+
+## 7.4 Summary
+
+# BMEM tends to extract more diverse slopes and model comparison hints at more
+# classes than LMEM did. Fitting process takes much longer compared to LMEM
+
+
+## 7.5 Extracting random slopes bernoulli model
+
+bmcoeff_g <- coef(bm2_bernoulli)$workerID
+head(bmcoeff_g)
+
+bmcoeff_g[1:124,1,1:4]
+coeffs <- coeffs %>%
+  mutate("B_bmr_g" = bmcoeff_g[1:124,1,1]) %>%
+  mutate("F_bmr_g" = bmcoeff_g[1:124,1,1] + bmcoeff_g[1:124,1,2]) %>%
+  mutate("L_bmr_g" = bmcoeff_g[1:124,1,1] + bmcoeff_g[1:124,1,3]) %>%
+  mutate("R_bmr_g" = bmcoeff_g[1:124,1,1] + bmcoeff_g[1:124,1,4])
+
+## 7.6 Finding classes and variable transformation
+
+# LPA for BMRS with 4 Separate variables suggests 8 classes, 
+# more classes may have lower BIC but performance might be inaccurate due to warnings
+coeffs %>%
+  dplyr::select(F_bmr_g, B_bmr_g, L_bmr_g, R_bmr_g) %>%
+  single_imputation() %>%
+  estimate_profiles(2:9) %>%
+  compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik"))
+
+lpa_bflr_cl_8_mod_bmr_g <-coeffs %>%
+  dplyr::select(F_bmr_g, B_bmr_g, L_bmr_g, R_bmr_g) %>%
+  single_imputation() %>%
+  estimate_profiles(8)
+
+lpa_bflr_cl_8_bmr_g <- get_data(lpa_bflr_cl_8_mod_bmr_g)$Class %>%
+  factor()
+
+ggplot(lca_tend, aes(lr_tend,fb_tend,  color=lpa_bflr_cl_8_bmr_g))+
+  geom_jitter(width=0.1, height=0.1)
+
+# Summarizing to FB, LR and own
+coeffs <- coeffs %>%
+  mutate("FB_bmr_g" = (B_bmr_g+F_bmr_g)/2)%>%
+  mutate("LR_bmr_g" = (L_bmr_g+R_bmr_g)/2)%>%
+  mutate("own.bmr_g" = (FB_bmr_g+LR_bmr_g)/2)
+
+# the histogram reveals the possibility for 4 classes for the own.bmr variable
+hist(coeffs$own.bmr_g)
+
+# 5 classes has the lowest BIC and no warnings
+coeffs %>%
+  dplyr::select(own.bmr_g) %>%
+  single_imputation() %>%
+  estimate_profiles(1:10)%>%
+  compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik"))
+
+bmr.own.mod_g <- coeffs %>%
+  dplyr::select(own.bmr_g) %>%
+  single_imputation() %>%
+  estimate_profiles(5)
+
+bmr.own.class_g <- get_data(bmr.own.mod_g)$Class %>%
+  factor()
+
+ggplot(lca_tend, aes(lr_tend, fb_tend, color = bmr.own.class_g))+
+  geom_jitter(width=0.1, height=0.1)
+
+# For the fine grained FB-LR 8 classes are found
+coeffs %>%
+  dplyr::select(FB_bmr_g, LR_bmr_g) %>%
+  single_imputation() %>%
+  estimate_profiles(1:10)%>%
+  compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik")) 
+
+bmr_bern <- coeffs %>%
+  dplyr::select(FB_bmr_g, LR_bmr_g) %>%
+  single_imputation() %>%
+  estimate_profiles(9) 
+
+bmr_bern_classes <- get_data(bmr_bern)$Class %>%
+  factor()
+
+ggplot(lca_tend, aes(lr_tend, fb_tend, color = bmr_bern_classes))+
+  geom_jitter(width=0.1, height=0.1)
+
+
 
 cor(coeffs$B,coeffs$B_bmr)
 cor(coeffs$F,coeffs$F_bmr)
