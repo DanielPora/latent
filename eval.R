@@ -1,18 +1,27 @@
 library(aricode)
 library(fossil)
 library(poLCA)
-library(rstudioapi)
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 library(plyr)
 library(dplyr)
 library(data.table)
 library(ggplot2)
+library(tidyLPA)
+library(lme4)
+library(brms)
 # Evaluation of a given dataset
 
+library(rstudioapi)
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
-data  <- read.csv("./test_df_FB_LR.csv")
+
+input_string <- "./test_df_FB_LR.csv"
+
+data  <- read.csv(input_string)
+
 data$Subject <- factor(data$Subject)
 data$true_class <- factor(data$true_class)
+
+n_true <- length(levels(data$true_class))
 n_obs <- nrow(dplyr::filter(data, Subject == 1))/2
 
 
@@ -56,15 +65,15 @@ for (x in 1:8) {
   bics <- append(bics, lca_x)
 }
 # 4 Class model with the best BIC                                                 
-(opt_class <- which.min(bics))
+opt_class <- which.min(bics)
 
-# printing output and graph
-lca_3 <- poLCA(f, df.LCA, nclass = opt_class, nrep = 50, verbose=FALSE, graphs = FALSE) 
+lca_3 <- poLCA(f, df.LCA, nclass = opt_class, nrep = 50, verbose=FALSE, graphs = FALSE)
+lca_tc <- poLCA(f, df.LCA, nclass = n_true, nrep = 50, verbose=FALSE, graphs = FALSE) 
 
 df.LCA_classes <- df.LCA_id %>%
   mutate('lca.class' = factor(lca_3$predclass))%>%
-  dplyr::select(Subject, lca.class)
-
+  mutate('lca.tc' = factor(lca_tc$predclass))%>%
+  dplyr::select(Subject, lca.class, lca.tc)
 
 data <- left_join(data, df.LCA_classes, by="Subject")
 
@@ -78,12 +87,142 @@ by_subj_lr <- dplyr::filter(data, trial_type == 'LR') %>%
 data <- left_join(data, by_subj_fb, by="Subject")
 data <- left_join(data, by_subj_lr, by="Subject")
 
-(RI_LCA <- rand.index(as.numeric(data$true_class),as.numeric(data$lca.class)))
-(NMI_LCA <- NMI(as.numeric(data$true_class),as.numeric(data$lca.class)))
 
 ## eval plot for lca
-ggplot(data, aes(lr_tend,fb_tend, color=true_class))+
-  geom_jitter(width=0.05, height=0.05, aes(shape=lca.class))
+ggplot(data, aes(lr_tend,fb_tend, color=lca.class))+
+  geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
+
+
+### lmem
+m0 <- glmer(own.cod ~ trial_type + (trial_type | Subject), data=data, family = binomial())
+coeffs <- coef(m0)$Subject
+coeffs$FB <- coeffs$`(Intercept)`
+coeffs$LR <- coeffs$`(Intercept)` + coeffs$trial_typeLR
+
+ahp <- coeffs %>%
+  dplyr::select(FB, LR) %>%
+  single_imputation() %>%
+  estimate_profiles(1:5)%>%
+  compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik", "CLC", "KIC"))
+
+lmem_mod <- coeffs %>%
+  dplyr::select(FB, LR) %>%
+  single_imputation() %>%
+  estimate_profiles(ahp$AHP)
+
+lmem_tc <- coeffs %>%
+  dplyr::select(FB, LR) %>%
+  single_imputation() %>%
+  estimate_profiles(n_true)
+
+lmem_class <- get_data(lmem_mod)$Class %>%
+  factor()
+
+lmem_class_tc <- get_data(lmem_tc)$Class %>%
+  factor()
+
+lmem_class <- data.frame(Subject = 1:length(lmem_class),lmem.class = lmem_class)
+lmem_class$Subject <- factor(lmem_class$Subject)
+
+lmem_class_tc <- data.frame(Subject = 1:length(lmem_class_tc),lmem.tc = lmem_class_tc)
+lmem_class_tc$Subject <- factor(lmem_class_tc$Subject)
+
+data <- left_join(data, lmem_class, by="Subject")
+data <- left_join(data, lmem_class_tc, by="Subject")
+
+ggplot(data, aes(lr_tend,fb_tend, color=lmem.class))+
+  geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
+
+
+#### bayes
+
+bm2 <- brm(data = data, own.cod ~ trial_type + (trial_type | Subject),
+           family = bernoulli(),
+           seed = 123,
+           cores = 8,
+           iter = 4000, warmup = 2000,
+           file = 'bm2')
+
+bmcoeff <- coef(bm2)$Subject
+
+coeffs <- coeffs %>%
+  mutate("FB_bmr" = bmcoeff[1:nrow(bmcoeff),1,1]) %>%
+  mutate("LR_bmr" = bmcoeff[1:nrow(bmcoeff),1,1] + bmcoeff[1:nrow(bmcoeff),1,2])
+  
+ahp <- coeffs %>%
+  dplyr::select(FB_bmr, LR_bmr) %>%
+  single_imputation() %>%
+  estimate_profiles(1:7)%>% 
+  compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik"))
+
+bm_mod <- coeffs %>%
+  dplyr::select(FB_bmr, LR_bmr) %>%
+  single_imputation() %>%
+  estimate_profiles(ahp$AHP)
+
+bm_mod_tc <- coeffs %>%
+  dplyr::select(FB_bmr, LR_bmr) %>%
+  single_imputation() %>%
+  estimate_profiles(n_true)
+
+bm_class_tc <- get_data(bm_mod_tc)$Class %>%
+  factor()
+
+bm_class <- get_data(bm_mod)$Class %>%
+  factor()
+
+bm_class <- data.frame(Subject = 1:length(bm_class),bm.class = bm_class)
+bm_class$Subject <- factor(bm_class$Subject)
+bm_class_tc <- data.frame(Subject = 1:length(bm_class_tc),bm.tc = bm_class_tc)
+bm_class_tc$Subject <- factor(bm_class_tc$Subject)
+
+data <- left_join(data, bm_class, by="Subject")
+data <- left_join(data, bm_class_tc, by="Subject")
+
+ggplot(data, aes(lr_tend,fb_tend, color=bm.class))+
+  geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
+
+
+(RI_LCA <- rand.index(as.numeric(data$true_class),as.numeric(data$lca.class)))
+(NMI_LCA <- NMI(as.numeric(data$true_class),as.numeric(data$lca.class)))
+(RIc_LCA <- rand.index(as.numeric(data$true_class),as.numeric(data$lca.tc)))
+(NMIc_LCA <- NMI(as.numeric(data$true_class),as.numeric(data$lca.tc)))
+
+(RI_LMEM <- rand.index(as.numeric(data$true_class),as.numeric(data$lmem.class)))
+(NMI_LMEM <- NMI(as.numeric(data$true_class),as.numeric(data$lmem.class)))
+(RIc_LMEM <- rand.index(as.numeric(data$true_class),as.numeric(data$lmem.tc)))
+(NMIc_LMEM <- NMI(as.numeric(data$true_class),as.numeric(data$lmem.tc)))
+
+(RI_BM <- rand.index(as.numeric(data$true_class),as.numeric(data$bm.class)))
+(NMI_BM <- NMI(as.numeric(data$true_class),as.numeric(data$bm.class)))
+(RIc_BM <- rand.index(as.numeric(data$true_class),as.numeric(data$bm.tc)))
+(NMIc_BM <- NMI(as.numeric(data$true_class),as.numeric(data$bm.tc)))
+
+
+for (number in 2:9){
+lmem_ri_mod <- coeffs %>%
+  dplyr::select(FB, LR) %>%
+  single_imputation() %>%
+  estimate_profiles(number)
+
+lmem_ri_class <- get_data(lmem_ri_mod)$Class %>%
+  factor()
+lmem_ri_class <- factor(lmem_ri_class)
+
+lmem_ri_class <- data.frame(Subject = 1:length(lmem_ri_class),lmem_ri.class = lmem_ri_class)
+lmem_ri_class$Subject <- factor(lmem_ri_class$Subject)
+
+data <- left_join(data %>% dplyr::select(-lmem_ri.class), lmem_ri_class, by="Subject")
+
+ri <- rand.index(as.numeric(data$true_class),as.numeric(data$lmem_ri.class))
+ni <- NMI(as.numeric(data$true_class),as.numeric(data$lmem_ri.class))
+print(c(ri,ni))
+}
+
+ 
+
+ 
+
 
 
 
