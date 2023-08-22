@@ -1,3 +1,4 @@
+
 library(aricode)
 library(fossil)
 library(poLCA)
@@ -12,217 +13,404 @@ library(brms)
 
 library(rstudioapi)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+source("dataset_generator.R")
 
+sc1 <- 
+  c( 1,  0,  0,  0,  1,
+     0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,
+     1,  0,  0,  0,  1)
+sc2 <-
+  c( 0,  1,  0,  0,  0,
+     0,  0,  0,  0,  1,
+     0,  0,  0,  0,  0,
+     1,  0,  0,  0,  0,
+     0,  0,  0,  1,  0)
+sc3 <- 
+  c( 0,  1,  0,  2,  0,
+     0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,
+     0,  2,  0,  1,  0)
+sc4 <- 
+  c( 0,  0,  1,  0,  0,
+     0,  0,  0,  0,  0,
+     1,  0,  0,  0,  1,
+     0,  0,  0,  0,  0,
+     0,  0,  1,  0,  0)
+sc5 <- 
+  c( 0,  0,  0,  0,  0,
+     0,  1,  0,  1,  0,
+     0,  0,  0,  0,  0,
+     0,  1,  0,  1,  0,
+     0,  0,  0,  0,  0)
+sc6 <- 
+  c( 0,  0,  0,  0,  0,
+     0,  0,  0,  1,  0,
+     0,  0,  0,  0,  0,
+     0,  1,  0,  0,  0,
+     0,  0,  0,  0,  0)
+sc7 <- 
+  c( 1,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,
+     0,  0,  1,  0,  0,
+     0,  0,  0,  0,  0,
+     0,  0,  0,  0,  1)
+sc8 <- 
+  c( 0,  0,  0,  0,  0,
+     0,  1,  0,  2,  0,
+     0,  0,  0,  0,  0,
+     0,  2,  0,  1,  0,
+     0,  0,  0,  0,  0)
+sc9 <- 
+  c( 1,  0,  0,  0,  5,
+     0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,
+     0,  1,  0,  0,  1,
+     5,  0,  0,  0,  5)
 
-input_string <- "./test_df_FB_LR.csv"
+Sys.time()
+time_id <- gsub(' ', '', gsub(':', '', gsub('-','',Sys.time())), fixed = TRUE)
 
-data  <- read.csv(input_string)
+scenarios <- list(sc1, sc2, sc3, sc4, sc5, sc6, sc7, sc8, sc9)
+names(scenarios) <- c("sc1", "sc2", "sc3", "sc4", "sc5", "sc6", "sc7", "sc8", "sc9")
 
-data$Subject <- factor(data$Subject)
-data$true_class <- factor(data$true_class)
+row.names = c("scenario", "obs_per_trial", "n_subj", "method", "class_true", "run", "class_pred", "RI", "RIc", "NMI", "NMIc", "warnings")
+length(row.names)
+measure_df = data.frame(matrix(ncol = length(row.names), nrow = 0))
+names(measure_df) = row.names
 
-n_true <- length(levels(data$true_class))
-n_obs <- nrow(dplyr::filter(data, Subject == 1))/2
+folder = paste('./data/',time_id,"/", sep="")
 
-
-# order the data
-data <- data[with(data, order(Subject, trial_type, own.cod)), ]
-
-
-# extend to wide format and naming accordingly
-name_vec <- c()
-suffixes <- rep(seq(1:(n_obs)), 2)
-for (elem in dplyr::filter(data, Subject == 1)[2]){
-  name_vec <- append(name_vec, elem)
+if (!dir.exists(folder)) dir.create(folder, recursive = TRUE)
+if (!file.exists(paste(folder,'./analysis_data.csv'))){
+  write.csv(measure_df, paste(folder,"analysis_data.csv", sep=''), row.names=FALSE)
+}else{
+  var = readline(prompt = "File already exists. Override? (y/n) ")
+  if (var == 'y'){
+    write.csv(measure_df, paste(folder,"analysis_data.csv", sep=''), row.names=FALSE)
+  }else{
+    print("Creating backup")
+    backup <- read.csv(paste(folder,"analysis_data.csv", sep=''))
+    write.csv(backup, paste(paste(folder,"backup_analysis_data", sep=''),time_id,".csv",sep=''), row.names=FALSE)
+    write.csv(measure_df, paste(folder,"analysis_data.csv", sep=''), row.names=FALSE)
+  }
 }
-for (i in 1:length(name_vec)){
-  name_vec[i] <- paste(name_vec[i],suffixes[i], sep="")
-}
+warn <- 'none'
 
 
-data_with_index <- ddply(data, .(Subject), mutate, 
-                         index = name_vec[1:length(Subject)])
+for (scenario in 1:9){  
+  for (obs_per_trial in c(2,4,8)){
+    for (n_subject in c(100,200,400)){ 
+      for (run in 1:5){
+        
+       
+        sc_name <- names(scenarios)[scenario]
+        sc_dist <- scenarios[[scenario]]
+        
+        filepath <- paste("./data/",time_id,"/",sc_name,"/obs",obs_per_trial,"/nSubj",n_subject,"/", sep="")
+        if (!dir.exists(filepath)) dir.create(filepath, recursive = TRUE)
+        
+        msg <- paste("Scenario: ",sc_name,", Obs: ",obs_per_trial,", Subjects: ", n_subject, ", Run: ", run, sep = '')
+        print(msg)
+        measure_df <- read.csv(paste(folder,"analysis_data.csv"))
+        
+        set.seed(3141+run)
+        data <- gen_data_FB_LR(n_subject, obs_per_trial, sc_dist)
+        
+        # True number of classes
+        n_true <- length(levels(data$true_class))
+        # Number of obs. per trial
+        n_obs <- nrow(dplyr::filter(data, Subject == 1))/2
+        
+        
+        # order the data
+        data <- data[with(data, order(Subject, trial_type, own.cod)), ]
+        
+        # extend to wide format and naming accordingly
+        name_vec <- c()
+        suffixes <- rep(seq(1:(n_obs)), 2)
+        for (elem in dplyr::filter(data, Subject == 1)[2]){
+          name_vec <- append(name_vec, elem)
+        }
+        for (i in 1:length(name_vec)){
+          name_vec[i] <- paste(name_vec[i],suffixes[i], sep="")
+        }
+        
+        
+        data_with_index <- ddply(data, .(Subject), mutate, 
+                                 index = name_vec[1:length(Subject)])
+        
+        df.LCA_id <- reshape2::dcast(data_with_index, Subject ~ index, value.var = 'own.cod')
+        # for poLCA we will need only the value column and no zero or negative values
+        df.LCA <- df.LCA_id %>% 
+          dplyr::select(-Subject)%>%
+          mutate_if(is.character,as.numeric)
+        
+        df.LCA <- df.LCA+1
+        
+        formula_func <- function(colnms1, dat) {
+          fmla <- as.formula(paste0("cbind(", 
+                                    paste(colnms1, collapse=","), ")", " ~ ", 1))
+          mva <- manova(fmla, data = dat)
+          mva$call <- fmla
+          mva
+        }
+        
+        f <- as.formula(with(df.LCA, formula_func(colnames(df.LCA), df.LCA)))
+        bics <- c()
+        for (x in 1:6) {
+          lca_x <- poLCA(f, df.LCA, nclass = x, nrep = 10, verbose=FALSE)$bic 
+          bics <- append(bics, lca_x)
+        }
+        
+                                                      
+        opt_class <- which.min(bics)
 
-df.LCA_id <- reshape2::dcast(data_with_index, Subject ~ index, value.var = 'own.cod')
-# for poLCA we will need only the value column and no zero or negative values
-df.LCA <- df.LCA_id %>% 
-  dplyr::select(-Subject)
-df.LCA <- df.LCA+1
+        
+        ww <- c()
+        tryCatch(
+          withCallingHandlers(lca_3 <- poLCA(f, df.LCA, nclass = opt_class, nrep = 10, verbose=FALSE, graphs = FALSE), warning = function(w) ww <<- c(ww, list(w)))
+        )
+        lca_3 <- poLCA(f, df.LCA, nclass = opt_class, nrep = 10, verbose=FALSE, graphs = FALSE)
+        
+        
+        wlen <- length(ww)
+        ww <- unlist(ww)
+        
+        if (wlen > 0) {
+          warn <- paste(wlen, " Warnings: ", paste(ww, collapse = '. Next warning: '), sep='')
+        } else {
+          warn <- 'none'
+        }
+        
+        
+        lca_tc <- poLCA(f, df.LCA, nclass = n_true, nrep = 10, verbose=FALSE, graphs = FALSE) 
+        
+        df.LCA_classes <- df.LCA_id %>%
+          mutate('lca.class' = factor(lca_3$predclass))%>%
+          mutate('lca.tc' = factor(lca_tc$predclass))%>%
+          dplyr::select(Subject, lca.class, lca.tc)
+        
+        data <- left_join(data, df.LCA_classes, by="Subject")
+        
+        by_subj_fb <- dplyr::filter(data, trial_type == 'FB') %>%
+          group_by(Subject) %>%
+          summarise(fb_tend = sum(own.cod)/n_obs)
+        by_subj_lr <- dplyr::filter(data, trial_type == 'LR') %>%
+          group_by(Subject) %>%
+          summarise(lr_tend = sum(own.cod)/n_obs)
+        
+        data <- left_join(data, by_subj_fb, by="Subject")
+        data <- left_join(data, by_subj_lr, by="Subject")
+        
+        # measure row for LCA
+        RI <- rand.index(as.numeric(data$true_class),as.numeric(data$lca.class))
+        NMI <- NMI(as.numeric(data$true_class),as.numeric(data$lca.class))
+        RIc <- rand.index(as.numeric(data$true_class),as.numeric(data$lca.tc))
+        NMIc <- NMI(as.numeric(data$true_class),as.numeric(data$lca.tc))
+        n_pred <- length(levels(data$lca.class))
+        
+        mes_LCA <- c(sc_name, obs_per_trial, n_subject, 'LCA', n_true, run, n_pred, RI, RIc, NMI, NMIc, warn)
+        measure_df[nrow(measure_df)+1,] <- mes_LCA
+        
+        ## eval plot for lca
+        
+        png(paste(filepath,'lca',run,'.png', sep=''))
+        lca_plot <- ggplot(data, aes(lr_tend,fb_tend, color=lca.class))+
+          geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
+        Sys.sleep(0.5)
+        print(lca_plot)
+        dev.off()
+        
+        
+        png(paste(filepath,'lca_tc',run,'.png', sep=''))
+        lca_tc_plot <- ggplot(data, aes(lr_tend,fb_tend, color=lca.tc))+
+          geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
+        print(lca_tc_plot)
+        Sys.sleep(0.5)
+        dev.off()
+        
+        ### lmem
+        ww <- c()
+        tryCatch(
+          withCallingHandlers(m0 <- glmer(own.cod ~ trial_type + (trial_type | Subject), data=data, family = binomial())
+                              , warning = function(w) ww <<- c(ww, list(w)))
+        )
+        
+        wlen <- length(ww)
+        ww <- unlist(ww)
+        
+        if (wlen > 0) {
+          warn <- paste(wlen, " Warnings: ", paste(ww, collapse = '. Next warning: '), sep='')
+        } else {
+          warn <- 'none'
+        }
+        
+        coeffs <- coef(m0)$Subject
+        coeffs$FB <- coeffs$`(Intercept)`
+        coeffs$LR <- coeffs$`(Intercept)` + coeffs$trial_typeLR
+        
+        ahp <- coeffs %>%
+          dplyr::select(FB, LR) %>%
+          single_imputation() %>%
+          estimate_profiles(1:6)%>%
+          compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik", "CLC", "KIC"))
+        
+        
+        lmem_mod <- coeffs %>%
+          dplyr::select(FB, LR) %>%
+          single_imputation() %>%
+          estimate_profiles(ahp$AHP)
+        
+        lmem_tc <- coeffs %>%
+          dplyr::select(FB, LR) %>%
+          single_imputation() %>%
+          estimate_profiles(n_true)
+        
+        lmem_class <- get_data(lmem_mod)$Class %>%
+          factor()
+        
+        lmem_class_tc <- get_data(lmem_tc)$Class %>%
+          factor()
+        
+        lmem_class <- data.frame(Subject = 1:length(lmem_class),lmem.class = lmem_class)
+        lmem_class$Subject <- factor(lmem_class$Subject)
+        
+        lmem_class_tc <- data.frame(Subject = 1:length(lmem_class_tc),lmem.tc = lmem_class_tc)
+        lmem_class_tc$Subject <- factor(lmem_class_tc$Subject)
+        
+        data$Subject <- factor(data$Subject)
+        
+        data <- left_join(data, lmem_class, by="Subject")
+        data <- left_join(data, lmem_class_tc, by="Subject")
+        
+        png(paste(filepath,'glm',run,'.png', sep=''))
+        glm_plot <- ggplot(data, aes(lr_tend,fb_tend, color=lmem.class))+
+          geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
+        Sys.sleep(0.5)
+        print(glm_plot)
+        dev.off()
+        
+        
+        png(paste(filepath,'glm_tc',run,'.png', sep=''))
+        glm_tc_plot <- ggplot(data, aes(lr_tend,fb_tend, color=lmem.tc))+
+          geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
+        print(glm_tc_plot)
+        Sys.sleep(0.5)
+        dev.off()
+       
+        # measure for GMEM
+        
+        RI <- rand.index(as.numeric(data$true_class),as.numeric(data$lmem.class))
+        NMI <- NMI(as.numeric(data$true_class),as.numeric(data$lmem.class))
+        RIc <- rand.index(as.numeric(data$true_class),as.numeric(data$lmem.tc))
+        NMIc<- NMI(as.numeric(data$true_class),as.numeric(data$lmem.tc))
+        n_pred <- length(levels(data$lmem.class))
+       
+        mes_GLM <- c(sc_name, obs_per_trial, n_subject, 'GLM', n_true, run, n_pred, RI, RIc, NMI, NMIc, warn)
+        measure_df[nrow(measure_df)+1,] <- mes_GLM
+        
+        #### BMEM analysis
 
-
-formula_func <- function(colnms1, dat) {
-  fmla <- as.formula(paste0("cbind(", 
-                            paste(colnms1, collapse=","), ")", " ~ ", 1))
-  mva <- manova(fmla, data = dat)
-  mva$call <- fmla
-  mva
-}
-
-f <- as.formula(with(df.LCA, formula_func(colnames(df.LCA), df.LCA)))
-bics <- c()
-for (x in 1:8) {
-  lca_x <- poLCA(f, df.LCA, nclass = x, nrep = 10, verbose=FALSE)$bic 
-  bics <- append(bics, lca_x)
-}
-# 4 Class model with the best BIC                                                 
-opt_class <- which.min(bics)
-
-lca_3 <- poLCA(f, df.LCA, nclass = opt_class, nrep = 50, verbose=FALSE, graphs = FALSE)
-lca_tc <- poLCA(f, df.LCA, nclass = n_true, nrep = 50, verbose=FALSE, graphs = FALSE) 
-
-df.LCA_classes <- df.LCA_id %>%
-  mutate('lca.class' = factor(lca_3$predclass))%>%
-  mutate('lca.tc' = factor(lca_tc$predclass))%>%
-  dplyr::select(Subject, lca.class, lca.tc)
-
-data <- left_join(data, df.LCA_classes, by="Subject")
-
-by_subj_fb <- dplyr::filter(data, trial_type == 'FB') %>%
-  group_by(Subject) %>%
-  summarise(fb_tend = sum(own.cod)/n_obs)
-by_subj_lr <- dplyr::filter(data, trial_type == 'LR') %>%
-  group_by(Subject) %>%
-  summarise(lr_tend = sum(own.cod)/n_obs)
-
-data <- left_join(data, by_subj_fb, by="Subject")
-data <- left_join(data, by_subj_lr, by="Subject")
-
-
-## eval plot for lca
-ggplot(data, aes(lr_tend,fb_tend, color=lca.class))+
-  geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
-
-
-### lmem
-m0 <- glmer(own.cod ~ trial_type + (trial_type | Subject), data=data, family = binomial())
-coeffs <- coef(m0)$Subject
-coeffs$FB <- coeffs$`(Intercept)`
-coeffs$LR <- coeffs$`(Intercept)` + coeffs$trial_typeLR
-
-ahp <- coeffs %>%
-  dplyr::select(FB, LR) %>%
-  single_imputation() %>%
-  estimate_profiles(1:5)%>%
-  compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik", "CLC", "KIC"))
-
-lmem_mod <- coeffs %>%
-  dplyr::select(FB, LR) %>%
-  single_imputation() %>%
-  estimate_profiles(ahp$AHP)
-
-lmem_tc <- coeffs %>%
-  dplyr::select(FB, LR) %>%
-  single_imputation() %>%
-  estimate_profiles(n_true)
-
-lmem_class <- get_data(lmem_mod)$Class %>%
-  factor()
-
-lmem_class_tc <- get_data(lmem_tc)$Class %>%
-  factor()
-
-lmem_class <- data.frame(Subject = 1:length(lmem_class),lmem.class = lmem_class)
-lmem_class$Subject <- factor(lmem_class$Subject)
-
-lmem_class_tc <- data.frame(Subject = 1:length(lmem_class_tc),lmem.tc = lmem_class_tc)
-lmem_class_tc$Subject <- factor(lmem_class_tc$Subject)
-
-data <- left_join(data, lmem_class, by="Subject")
-data <- left_join(data, lmem_class_tc, by="Subject")
-
-ggplot(data, aes(lr_tend,fb_tend, color=lmem.class))+
-  geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
-
-
-#### bayes
-
-bm2 <- brm(data = data, own.cod ~ trial_type + (trial_type | Subject),
-           family = bernoulli(),
-           seed = 123,
-           cores = 8,
-           iter = 4000, warmup = 2000,
-           file = 'bm2')
-
-bmcoeff <- coef(bm2)$Subject
-
-coeffs <- coeffs %>%
-  mutate("FB_bmr" = bmcoeff[1:nrow(bmcoeff),1,1]) %>%
-  mutate("LR_bmr" = bmcoeff[1:nrow(bmcoeff),1,1] + bmcoeff[1:nrow(bmcoeff),1,2])
+        ww <- c()
+       tryCatch(
+          withCallingHandlers(bm2 <- brm(data = data, own.cod ~ trial_type + (trial_type | Subject),
+                                         family = bernoulli(),
+                                         seed = 123,
+                                         cores = 8,
+                                         iter = 4000, warmup = 2000,
+                                         file = paste(filepath, 'bm', run, sep = ""))
+                              , warning = function(w) ww <<- c(ww, list(w)))
+        )
+        
+        wlen <- length(ww)
+        ww <- unlist(ww)
+        
+        if (wlen > 0) {
+          warn <- paste(wlen, " Warnings: ", paste(ww, collapse = '. Next warning: '), sep='')
+        } else {
+          warn <- 'none'
+        }
+        
+        bmcoeff <- coef(bm2)$Subject
+        
+        coeffs <- coeffs %>%
+          mutate("FB_bmr" = bmcoeff[1:nrow(bmcoeff),1,1]) %>%
+          mutate("LR_bmr" = bmcoeff[1:nrow(bmcoeff),1,1] + bmcoeff[1:nrow(bmcoeff),1,2])
+          
+        ahp <- coeffs %>%
+          dplyr::select(FB_bmr, LR_bmr) %>%
+          single_imputation() %>%
+          estimate_profiles(1:6)%>% 
+          compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik"))
+        
+        bm_mod <- coeffs %>%
+          dplyr::select(FB_bmr, LR_bmr) %>%
+          single_imputation() %>%
+          estimate_profiles(ahp$AHP)
+        
+        bm_mod_tc <- coeffs %>%
+          dplyr::select(FB_bmr, LR_bmr) %>%
+          single_imputation() %>%
+          estimate_profiles(n_true)
+        
+        bm_class_tc <- get_data(bm_mod_tc)$Class %>%
+          factor()
+        
+        bm_class <- get_data(bm_mod)$Class %>%
+          factor()
+        
+        bm_class <- data.frame(Subject = 1:length(bm_class),bm.class = bm_class)
+        bm_class$Subject <- factor(bm_class$Subject)
+        bm_class_tc <- data.frame(Subject = 1:length(bm_class_tc),bm.tc = bm_class_tc)
+        bm_class_tc$Subject <- factor(bm_class_tc$Subject)
+        
+        data <- left_join(data, bm_class, by="Subject")
+        data <- left_join(data, bm_class_tc, by="Subject")
+        
+        
+        ## plot BM
+        png(paste(filepath,'bm',run,'.png', sep=''))
+        plot_bm <- ggplot(data, aes(lr_tend,fb_tend, color=bm.class))+
+          geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
+        print(plot_bm)
+        Sys.sleep(0.5)
+        dev.off()
+        
+        
+        png(paste(filepath,'bm_tc',run,'.png', sep=''))
+        plot_tc_bm <- ggplot(data, aes(lr_tend,fb_tend, color=bm.tc))+
+          geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
+        print(plot_tc_bm)
+        Sys.sleep(0.5)
+        dev.off()
+        
+        
+        
+        # measure for BMEM
+        RI <- rand.index(as.numeric(data$true_class),as.numeric(data$bm.class))
+        NMI <- NMI(as.numeric(data$true_class),as.numeric(data$bm.class))
+        RIc <- rand.index(as.numeric(data$true_class),as.numeric(data$bm.tc))
+        NMIc <- NMI(as.numeric(data$true_class),as.numeric(data$bm.tc))
+        n_pred <- length(levels(data$bm.class))
+        
+      
+        mes_BM <- c(sc_name, obs_per_trial, n_subject, 'BMEM', n_true, run, n_pred, RI, RIc, NMI, NMIc, warn)
+        measure_df[nrow(measure_df)+1,] <- mes_BM
+        
+        write.csv(data, paste(filepath,"run",run,".csv", sep=""), row.names=FALSE)
+        
+        write.csv(measure_df, paste(folder,"analysis_data.csv"), row.names=FALSE)
+        
+      }
+      
+    }
+  }
   
-ahp <- coeffs %>%
-  dplyr::select(FB_bmr, LR_bmr) %>%
-  single_imputation() %>%
-  estimate_profiles(1:7)%>% 
-  compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik"))
-
-bm_mod <- coeffs %>%
-  dplyr::select(FB_bmr, LR_bmr) %>%
-  single_imputation() %>%
-  estimate_profiles(ahp$AHP)
-
-bm_mod_tc <- coeffs %>%
-  dplyr::select(FB_bmr, LR_bmr) %>%
-  single_imputation() %>%
-  estimate_profiles(n_true)
-
-bm_class_tc <- get_data(bm_mod_tc)$Class %>%
-  factor()
-
-bm_class <- get_data(bm_mod)$Class %>%
-  factor()
-
-bm_class <- data.frame(Subject = 1:length(bm_class),bm.class = bm_class)
-bm_class$Subject <- factor(bm_class$Subject)
-bm_class_tc <- data.frame(Subject = 1:length(bm_class_tc),bm.tc = bm_class_tc)
-bm_class_tc$Subject <- factor(bm_class_tc$Subject)
-
-data <- left_join(data, bm_class, by="Subject")
-data <- left_join(data, bm_class_tc, by="Subject")
-
-ggplot(data, aes(lr_tend,fb_tend, color=bm.class))+
-  geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
-
-
-(RI_LCA <- rand.index(as.numeric(data$true_class),as.numeric(data$lca.class)))
-(NMI_LCA <- NMI(as.numeric(data$true_class),as.numeric(data$lca.class)))
-(RIc_LCA <- rand.index(as.numeric(data$true_class),as.numeric(data$lca.tc)))
-(NMIc_LCA <- NMI(as.numeric(data$true_class),as.numeric(data$lca.tc)))
-
-(RI_LMEM <- rand.index(as.numeric(data$true_class),as.numeric(data$lmem.class)))
-(NMI_LMEM <- NMI(as.numeric(data$true_class),as.numeric(data$lmem.class)))
-(RIc_LMEM <- rand.index(as.numeric(data$true_class),as.numeric(data$lmem.tc)))
-(NMIc_LMEM <- NMI(as.numeric(data$true_class),as.numeric(data$lmem.tc)))
-
-(RI_BM <- rand.index(as.numeric(data$true_class),as.numeric(data$bm.class)))
-(NMI_BM <- NMI(as.numeric(data$true_class),as.numeric(data$bm.class)))
-(RIc_BM <- rand.index(as.numeric(data$true_class),as.numeric(data$bm.tc)))
-(NMIc_BM <- NMI(as.numeric(data$true_class),as.numeric(data$bm.tc)))
-
-
-for (number in 2:9){
-lmem_ri_mod <- coeffs %>%
-  dplyr::select(FB, LR) %>%
-  single_imputation() %>%
-  estimate_profiles(number)
-
-lmem_ri_class <- get_data(lmem_ri_mod)$Class %>%
-  factor()
-lmem_ri_class <- factor(lmem_ri_class)
-
-lmem_ri_class <- data.frame(Subject = 1:length(lmem_ri_class),lmem_ri.class = lmem_ri_class)
-lmem_ri_class$Subject <- factor(lmem_ri_class$Subject)
-
-data <- left_join(data %>% dplyr::select(-lmem_ri.class), lmem_ri_class, by="Subject")
-
-ri <- rand.index(as.numeric(data$true_class),as.numeric(data$lmem_ri.class))
-ni <- NMI(as.numeric(data$true_class),as.numeric(data$lmem_ri.class))
-print(c(ri,ni))
 }
 
- 
-
- 
 
 
-
-
+  
