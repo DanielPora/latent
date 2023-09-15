@@ -84,7 +84,7 @@ names(measure_df) = row.names
 folder = paste('./data/',time_id,"/", sep="")
 
 if (!dir.exists(folder)) dir.create(folder, recursive = TRUE)
-if (!file.exists(paste(folder,'./analysis_data.csv'))){
+if (!file.exists(paste(folder,'./analysis_data.csv', sep=''))){
   write.csv(measure_df, paste(folder,"analysis_data.csv", sep=''), row.names=FALSE)
 }else{
   var = readline(prompt = "File already exists. Override? (y/n) ")
@@ -98,6 +98,11 @@ if (!file.exists(paste(folder,'./analysis_data.csv'))){
   }
 }
 warn <- 'none'
+
+scenario <- 4
+obs_per_trial <- 4
+n_subject <- 200
+run <- 1
 
 
 for (scenario in 1:9){  
@@ -114,7 +119,7 @@ for (scenario in 1:9){
         
         msg <- paste("Scenario: ",sc_name,", Obs: ",obs_per_trial,", Subjects: ", n_subject, ", Run: ", run, sep = '')
         print(msg)
-        measure_df <- read.csv(paste(folder,"analysis_data.csv"))
+        measure_df <- read.csv(paste(folder,"analysis_data.csv", sep=""))
         
         set.seed(3141+run)
         data <- gen_data_FB_LR(n_subject, obs_per_trial, sc_dist)
@@ -234,10 +239,23 @@ for (scenario in 1:9){
         
         ### lmem
         ww <- c()
+        
+        # original
+        
+        # tryCatch(
+        #   withCallingHandlers(m0 <- glmer(own.cod ~ trial_type + (trial_type | Subject), data=data, family = binomial())
+        #                       , warning = function(w) ww <<- c(ww, list(w)))
+        # )
+        
+        
+        # Appendix with linear mixed effect model
+        
         tryCatch(
-          withCallingHandlers(m0 <- glmer(own.cod ~ trial_type + (trial_type | Subject), data=data, family = binomial())
+          withCallingHandlers(m0 <- lmer(own.cod ~ trial_type + (trial_type | Subject), data=data)
                               , warning = function(w) ww <<- c(ww, list(w)))
         )
+        
+        
         
         wlen <- length(ww)
         ww <- unlist(ww)
@@ -315,15 +333,28 @@ for (scenario in 1:9){
         #### BMEM analysis
 
         ww <- c()
-       tryCatch(
+        # original
+        
+        # tryCatch(
+        #   withCallingHandlers(bm2 <- brm(data = data, own.cod ~ trial_type + (trial_type | Subject),
+        #                                  family = bernoulli(),
+        #                                  seed = 123,
+        #                                  cores = 8,
+        #                                  iter = 4000, warmup = 2000,
+        #                                  file = paste(filepath, 'bm', run, sep = ""))
+        #                       , warning = function(w) ww <<- c(ww, list(w)))
+        # )
+        
+        # Appendix
+        tryCatch(
           withCallingHandlers(bm2 <- brm(data = data, own.cod ~ trial_type + (trial_type | Subject),
-                                         family = bernoulli(),
                                          seed = 123,
                                          cores = 8,
                                          iter = 4000, warmup = 2000,
                                          file = paste(filepath, 'bm', run, sep = ""))
                               , warning = function(w) ww <<- c(ww, list(w)))
         )
+        
         
         wlen <- length(ww)
         ww <- unlist(ww)
@@ -402,7 +433,7 @@ for (scenario in 1:9){
         
         write.csv(data, paste(filepath,"run",run,".csv", sep=""), row.names=FALSE)
         
-        write.csv(measure_df, paste(folder,"analysis_data.csv"), row.names=FALSE)
+        write.csv(measure_df, paste(folder,"analysis_data.csv", sep=''), row.names=FALSE)
         
       }
       
