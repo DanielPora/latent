@@ -99,7 +99,7 @@ if (!file.exists(paste(folder,'./analysis_data.csv', sep=''))){
 }
 warn <- 'none'
 
-scenario <- 4
+scenario <- 8
 obs_per_trial <- 4
 n_subject <- 200
 run <- 1
@@ -211,6 +211,8 @@ for (scenario in 1:9){
         data <- left_join(data, by_subj_lr, by="Subject")
         
         # measure row for LCA
+        class_compare <- distinct(data[ , c('Subject', 'lca.class', 'true_class')])
+        
         RI <- rand.index(as.numeric(data$true_class),as.numeric(data$lca.class))
         NMI <- NMI(as.numeric(data$true_class),as.numeric(data$lca.class))
         RIc <- rand.index(as.numeric(data$true_class),as.numeric(data$lca.tc))

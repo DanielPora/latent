@@ -60,8 +60,44 @@ ggplot(grouped1, aes(x = obs_per_trial, y = RIc_mean, fill = method)) +
 
 
 
+## NMIc
 
 ggplot(filter(df, method != 'LCA 2'), aes(x = obs_per_trial, y = NMIc_mean, fill = method)) +
   geom_boxplot()+
-  facet_wrap(~ scenario, ncol=3)
+  facet_wrap(~ scenario, ncol=3)+
+  ylab("NMIc")+
+  xlab("Observations per trial type")+
+  labs(fill='Method')
+
+
+## RIc
+
+ggplot(filter(df, method != 'LCA 2'), aes(x = obs_per_trial, y = RIc_mean, fill = method)) +
+  geom_boxplot()+
+  facet_wrap(~ scenario, ncol=3)+
+  ylab("RIc")+
+  xlab("Observations per trial type")+
+  labs(fill='Method')
+
+
+## NMI
+
+ggplot(filter(df, method != 'LCA 2'), aes(x = obs_per_trial, y = NMI_mean, fill = method)) +
+  geom_boxplot()+
+  facet_wrap(~ scenario, ncol=3)+
+  ylab("NMI")+
+  xlab("Observations per trial type")+
+  labs(fill='Method')
+
+## RI
+
+ggplot(filter(df, method != 'LCA 2'), aes(x = obs_per_trial, y = RI_mean, fill = method)) +
+  geom_boxplot()+
+  facet_wrap(~ scenario, ncol=3)+
+  ylab("RI")+
+  xlab("Observations per trial type")+
+  labs(fill='Method')
+
+
+
 
