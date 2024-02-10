@@ -106,6 +106,7 @@ trend_plot <- ggplot(class_compare, aes(lr_tend,fb_tend, color=true_class))+
   xlab('LR-ratio')+
   theme(legend.position="none")+
   labs(title = sc_name)
+
 Sys.sleep(0.5)
 print(trend_plot)
 dev.off()

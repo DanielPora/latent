@@ -1,0 +1,2 @@
+"scenario","obs_per_trial","n_subj","method","class_true","run","class_pred","RI","RIc","NMI","NMIc","warnings"
+"sc1","2","200","LCA","4","2","4","0.995376884422111","0.995376884422111","0.982478308046063","0.982478308046063","none"

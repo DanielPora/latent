@@ -1,0 +1,554 @@
+"scenario","obs_per_trial","n_subj","method","class_true","run","class_pred","RI","RIc","adj.RI","adj.RIc","NMI","NMIc","warnings"
+"sc6","2","100","LCA","2","1","2","0.886060606060606","0.886060606060606","0.772121212121212","0.772121212121212","0.671982907622346","0.671982907622346","none"
+"sc6","2","100","GLM","2","1","6","0.638383838383838","0.886060606060606","0.806226935810979","0.772121212121212","0.301250868092417","0.671982907622346","none"
+"sc6","2","100","LMEM","2","1","1","0.5","0.818181818181818","0","0.636363636363636","0","0.552739808406552","none"
+"sc6","2","100","BMEM","2","1","1","0.5","0.904040404040404","0","0.808080808080808","0","0.719808743504595","2 Warnings: There were 5 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","2","100","BBMEM","2","1","0","0.661212121212121","0.886060606060606","0.78372164198001","0.772121212121212","0.340799779528124","0.671982907622346","none"
+"sc6","2","100","LCA","2","2","3","0.775757575757576","0.868484848484849","0.635646445722361","0.73696351355918","0.440380569096918","0.633340330800202","none"
+"sc6","2","100","GLM","2","2","5","0.61959595959596","0.802222222222222","0.947402630723706","0.604418613193801","0.262265766731179","0.504192587645176","none"
+"sc6","2","100","LMEM","2","2","1","0.496767676767677","0.851313131313131","0","0.702626262626263","0","0.598220969206673","none"
+"sc6","2","100","BMEM","2","2","1","0.496767676767677","0.851313131313131","0","0.702626262626263","0","0.598220969206673","2 Warnings: There were 136 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","2","100","BBMEM","2","2","0","0.643636363636364","0.868484848484849","0.85930461331126","0.736955268559573","0.304437663586132","0.634029509873843","3 Warnings: There were 168 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","2","100","LCA","2","3","3","0.787272727272727","0.851313131313131","0.679477383084638","0.702639612138625","0.489626900904169","0.626747844129717","none"
+"sc6","2","100","GLM","2","3","1","0.494949494949495","0.886060606060606","0","0.772131441910576","0","0.724907088578373","none"
+"sc6","2","100","LMEM","2","3","1","0.494949494949495","0.886060606060606","0","0.772131441910576","0","0.724907088578373","none"
+"sc6","2","100","BMEM","2","3","1","0.494949494949495","0.886060606060606","0","0.772131441910576","0","0.724907088578373","2 Warnings: There were 1 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","2","100","BBMEM","2","3","0","0.641616161616162","0.886060606060606","0.564354518611743","0.772131441910576","0.325882672870158","0.724907088578373","2 Warnings: There were 3 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","2","100","LCA","2","4","2","0.886060606060606","0.886060606060606","0.772116710722905","0.772116710722905","0.669784886440414","0.669784886440414","none"
+"sc6","2","100","GLM","2","4","3","0.821616161616162","0.851313131313131","0.891876260814396","0.70263747629719","0.564879906647421","0.607076878344437","none"
+"sc6","2","100","LMEM","2","4","1","0.502222222222222","0.802222222222222","0","0.604461491221927","0","0.526317974577727","none"
+"sc6","2","100","BMEM","2","4","1","0.502222222222222","0.802222222222222","0","0.604461491221927","0","0.526317974577727","2 Warnings: There were 10 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","2","100","BBMEM","2","4","0","0.611717171717172","0.802222222222222","0.548642196359296","0.604461491221927","0.276027239325506","0.526317974577727","2 Warnings: There were 9 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","2","100","LCA","2","5","2","0.868484848484849","0.868484848484849","0.736969696969697","0.736969696969697","0.657373750073217","0.657373750073217","none"
+"sc6","2","100","GLM","2","5","5","0.644040404040404","0.868484848484849","0.673616579364808","0.736969696969697","0.30406717086684","0.657373750073217","none"
+"sc6","2","100","LMEM","2","5","1","0.5","0.868484848484849","0","0.736969696969697","0","0.657373750073217","none"
+"sc6","2","100","BMEM","2","5","1","0.5","0.868484848484849","0","0.736969696969697","0","0.657373750073217","2 Warnings: There were 1 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","2","100","BBMEM","2","5","0","0.617777777777778","0.868484848484849","0.728667872587233","0.736969696969697","0.292136641609133","0.657373750073217","none"
+"sc6","2","200","LCA","2","1","4","0.698693467336683","0.819095477386935","0.616689232813159","0.638203668487537","0.341707689571445","0.5439852372916","none"
+"sc6","2","200","GLM","2","1","5","0.657889447236181","0.811105527638191","0.659153900292525","0.622249569585057","0.288191384559728","0.545479680427262","none"
+"sc6","2","200","LMEM","2","1","1","0.497537688442211","0.843668341708543","0","0.687338849883073","0","0.58810090976734","none"
+"sc6","2","200","BMEM","2","1","1","0.497537688442211","0.811105527638191","0","0.622249569585057","0","0.545479680427262","2 Warnings: There were 179 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","2","200","BBMEM","2","1","0","0.651859296482412","0.811105527638191","0.964792710900688","0.622249569585057","0.316276294972219","0.545479680427262","2 Warnings: There were 115 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","2","200","LCA","2","2","4","0.681658291457286","0.886633165829146","0.790934463245566","0.773264856771978","0.289141255862655","0.675993621045031","none"
+"sc6","2","200","GLM","2","2","4","0.753015075376884","0.860552763819096","0.840605004972131","0.721104541669045","0.349507718537527","0.614996472443022","none"
+"sc6","2","200","LMEM","2","2","1","0.49929648241206","0.80321608040201","0","0.606430268536732","0","0.499591928329768","none"
+"sc6","2","200","BMEM","2","2","1","0.49929648241206","0.886633165829146","0","0.773264856771978","0","0.675993621045031","3 Warnings: There were 201 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess"
+"sc6","2","200","BBMEM","2","2","0","0.634422110552764","0.886633165829146","0.973559783638303","0.773264856771978","0.295065883646013","0.675993621045031","2 Warnings: There were 55 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","2","200","LCA","2","3","3","0.796331658291457","0.860552763819096","0.823452209871836","0.721122288047131","0.447065926638878","0.638541652290405","none"
+"sc6","2","200","GLM","2","3","2","0.869145728643216","0.869145728643216","0.738288401418066","0.738288401418066","0.650046208030644","0.650046208030644","none"
+"sc6","2","200","LMEM","2","3","1","0.498291457286432","0.869145728643216","0","0.738288401418066","0","0.650046208030644","none"
+"sc6","2","200","BMEM","2","3","1","0.498291457286432","0.869145728643216","0","0.738288401418066","0","0.650046208030644","2 Warnings: There were 10 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","2","200","BBMEM","2","3","0","0.642261306532663","0.869145728643216","0.718601901775802","0.738288401418066","0.30689924061885","0.650046208030644","2 Warnings: There were 17 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","2","200","LCA","2","4","4","0.710150753768844","0.860552763819096","0.721326488500037","0.721101600622522","0.335135542697113","0.626562955720536","none"
+"sc6","2","200","GLM","2","4","3","0.723065326633166","0.852060301507538","0.943852597777582","0.704120480482207","0.385770860057956","0.618652375039922","none"
+"sc6","2","200","LMEM","2","4","1","0.497939698492462","0.843668341708543","0","0.687334870636759","0","0.595854305069675","none"
+"sc6","2","200","BMEM","2","4","1","0.497939698492462","0.860552763819096","0","0.7211071446125","0","0.643834876387783","4 Warnings: There were 188 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","2","200","BBMEM","2","4","0","0.627085427135678","0.852060301507538","0.971458351851034","0.704120480482207","0.283330809092983","0.618652375039922","2 Warnings: There were 20 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","2","200","LCA","2","5","3","0.787688442211055","0.877839195979899","0.82547471677786","0.755674951752559","0.422772712228767","0.666008932127187","none"
+"sc6","2","200","GLM","2","5","4","0.70427135678392","0.877839195979899","0.595487053322547","0.755674951752559","0.371304962432273","0.666008932127187","none"
+"sc6","2","200","LMEM","2","5","1","0.498291457286432","0.877839195979899","0","0.755676294283984","0","0.675599527077733","none"
+"sc6","2","200","BMEM","2","5","1","0.498291457286432","0.852060301507538","0","0.704119180432109","0","0.619164165175603","2 Warnings: There were 86 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","2","200","BBMEM","2","5","0","0.627939698492462","0.860552763819096","0.631354362296066","0.721105431858637","0.297644922972478","0.644427722973288","2 Warnings: There were 22 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","2","400","LCA","2","1","4","0.723170426065163","0.891340852130326","0.655299917594884","0.782684696968426","0.371584968050778","0.697656684993839","none"
+"sc6","2","400","GLM","2","1","1","0.498947368421053","0.891340852130326","0","0.782684696968426","0","0.697656684993839","none"
+"sc6","2","400","LMEM","2","1","1","0.498947368421053","0.891340852130326","0","0.782684696968426","0","0.697656684993839","none"
+"sc6","2","400","BMEM","2","1","1","0.498947368421053","0.891340852130326","0","0.782684696968426","0","0.697656684993839","2 Warnings: There were 50 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","2","400","BBMEM","2","1","0","0.642393483709273","0.891340852130326","1","0.782684696968426","0.310412732919101","0.697656684993839","2 Warnings: There were 62 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","2","400","LCA","2","2","4","0.728333333333333","0.873796992481203","0.952668670063445","0.747588039366258","0.361123512872039","0.642408801796905","none"
+"sc6","2","400","GLM","2","2","4","0.687330827067669","0.865175438596491","0.925773620150712","0.730352994382931","0.353466432644403","0.636541765279828","none"
+"sc6","2","400","LMEM","2","2","1","0.5015664160401","0.856654135338346","0","0.713310431639764","0","0.621205196478616","none"
+"sc6","2","400","BMEM","2","2","1","0.5015664160401","0.848233082706767","0","0.696466165413534","0","0.588714161346723","4 Warnings: There were 162 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","2","400","BBMEM","2","2","0","0.665513784461153","0.865175438596491","1","0.730352994382931","0.311511726963372","0.636541765279828","3 Warnings: There were 8 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess"
+"sc6","2","400","LCA","2","3","4","0.717418546365915","0.839912280701754","0.524734931616503","0.679824561403509","0.336730978446549","0.571186571402062","none"
+"sc6","2","400","GLM","2","3","2","0.839912280701754","0.839912280701754","0.679824561403509","0.679824561403509","0.571186571402062","0.571186571402062","none"
+"sc6","2","400","LMEM","2","3","1","0.5","0.831691729323308","0","0.663383458646617","0","0.554455394710387","none"
+"sc6","2","400","BMEM","2","3","1","0.5","0.831691729323308","0","0.663383458646617","0","0.564652407054851","3 Warnings: There were 105 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","2","400","BBMEM","2","3","0","0.643997493734336","0.856654135338346","0.614558637233435","0.713308270676692","0.297991143763047","0.615206309432744","4 Warnings: There were 149 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","2","400","LCA","2","4","4","0.742218045112782","0.856654135338346","0.693346119844265","0.713309065914891","0.367706305918112","0.608027477278482","none"
+"sc6","2","400","GLM","2","4","4","0.756077694235589","0.780701754385965","0.677117227389863","0.561424595521234","0.388737429657211","0.476465996667246","none"
+"sc6","2","400","LMEM","2","4","1","0.499197994987469","0.852431077694236","0","0.704866711387303","0","0.607763559120698","none"
+"sc6","2","400","BMEM","2","4","1","0.499197994987469","0.869473684210526","0","0.738950516736753","0","0.643109364493621","4 Warnings: There were 797 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","2","400","BBMEM","2","4","0","0.64359649122807","0.869473684210526","0.583743323622155","0.738952363713288","0.29907599513378","0.650418683328297","3 Warnings: There were 81 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess"
+"sc6","2","400","LCA","2","5","4","0.742957393483709","0.873796992481203","0.735127624935944","0.747594508161458","0.364630905010227","0.661799838184444","none"
+"sc6","2","400","GLM","2","5","2","0.873796992481203","0.873796992481203","0.747593556888841","0.747593556888841","0.653979130813983","0.653979130813983","none"
+"sc6","2","400","LMEM","2","5","1","0.49906015037594","0.860902255639098","0","0.721804786501003","0","0.629730527203659","none"
+"sc6","2","400","BMEM","2","5","1","0.49906015037594","0.873796992481203","0","0.747594508161458","0","0.661799838184444","4 Warnings: There were 430 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","2","400","BBMEM","2","5","0","0.646353383458647","0.873796992481203","0.575338941309006","0.747594508161458","0.301370534083039","0.661799838184444","4 Warnings: There were 380 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","4","100","LCA","2","1","2","0.96040404040404","0.96040404040404","0.920808080808081","0.920808080808081","0.857679081234733","0.857679081234733","none"
+"sc6","4","100","GLM","2","1","4","0.738989898989899","0.922424242424242","0.955960592886079","0.844848484848485","0.447037513726907","0.762227875060783","none"
+"sc6","4","100","LMEM","2","1","1","0.5","0.96040404040404","0","0.920808080808081","0","0.857679081234733","none"
+"sc6","4","100","BMEM","2","1","1","0.5","0.98","0","0.96","0","0.927556607157619","2 Warnings: There were 15 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","4","100","BBMEM","2","1","0","0.736363636363636","0.96040404040404","0.956198458333899","0.920808080808081","0.438282819233945","0.875727086320308","none"
+"sc6","4","100","LCA","2","2","2","1","1","1","1","1","1","none"
+"sc6","4","100","GLM","2","2","2","0.96040404040404","0.96040404040404","0.92080311615494","0.92080311615494","0.877103620723177","0.877103620723177","none"
+"sc6","4","100","LMEM","2","2","1","0.496767676767677","1","0","1","0","1","none"
+"sc6","4","100","BMEM","2","2","1","0.496767676767677","0.98","0","0.959997805817815","0","0.928348092967327","2 Warnings: There were 18 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","4","100","BBMEM","2","2","0","0.681010101010101","0.98","1","0.959997805817815","0.383038128966787","0.928348092967327","2 Warnings: There were 34 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","4","100","LCA","2","3","2","0.98","0.98","0.959996081648646","0.959996081648646","0.9289911704819","0.9289911704819","none"
+"sc6","4","100","GLM","2","3","2","0.96040404040404","0.96040404040404","0.9208","0.9208","0.85855945745818","0.85855945745818","none"
+"sc6","4","100","LMEM","2","3","1","0.494949494949495","0.98","0","0.959996081648646","0","0.9289911704819","none"
+"sc6","4","100","BMEM","2","3","1","0.494949494949495","0.98","0","0.959996081648646","0","0.9289911704819","2 Warnings: There were 31 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","4","100","BBMEM","2","3","0","0.681818181818182","0.98","1","0.959996081648646","0.375642679034631","0.9289911704819","2 Warnings: There were 7 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","4","100","LCA","2","4","2","0.96040404040404","0.96040404040404","0.920809360656797","0.920809360656797","0.874942534086306","0.874942534086306","none"
+"sc6","4","100","GLM","2","4","4","0.729090909090909","0.96040404040404","0.587304366396763","0.920809360656797","0.449557755293294","0.874942534086306","none"
+"sc6","4","100","LMEM","2","4","1","0.502222222222222","0.96040404040404","0","0.920809360656797","0","0.874942534086306","none"
+"sc6","4","100","BMEM","2","4","2","0.96040404040404","0.96040404040404","0.920809360656797","0.920809360656797","0.874942534086306","0.874942534086306","none"
+"sc6","4","100","BBMEM","2","4","0","0.689494949494949","0.96040404040404","0.730148095757974","0.920809360656797","0.378096190432559","0.874942534086306","2 Warnings: There were 12 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","4","100","LCA","2","5","2","0.941212121212121","0.941212121212121","0.882424242424242","0.882424242424242","0.80596929254674","0.80596929254674","none"
+"sc6","4","100","GLM","2","5","2","0.941212121212121","0.941212121212121","0.882424242424242","0.882424242424242","0.80596929254674","0.80596929254674","none"
+"sc6","4","100","LMEM","2","5","6","0.677373737373737","0.922424242424242","0.790669122160835","0.844848484848485","0.329840553875998","0.762227875060783","none"
+"sc6","4","100","BMEM","2","5","1","0.5","0.941212121212121","0","0.882424242424242","0","0.80596929254674","2 Warnings: There were 87 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","4","100","BBMEM","2","5","0","0.681414141414141","0.941212121212121","0.713785699692777","0.882424242424242","0.349192983602313","0.80596929254674","2 Warnings: There were 3 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","4","200","LCA","2","1","4","0.728844221105528","0.99","0.599049020064162","0.979999544647596","0.424929920820906","0.959456949772574","none"
+"sc6","4","200","GLM","2","1","2","0.99","0.99","0.979999505050755","0.979999505050755","0.959531296097706","0.959531296097706","none"
+"sc6","4","200","LMEM","2","1","1","0.497537688442211","0.980100502512563","0","0.96020003979996","0","0.919201764316912","none"
+"sc6","4","200","BMEM","2","1","1","0.497537688442211","0.99","0","0.979999544647596","0","0.959456949772574","2 Warnings: There were 15 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","4","200","BBMEM","2","1","0","0.724371859296482","0.99","1","0.979999544647596","0.406699091284731","0.959456949772574","2 Warnings: There were 53 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","4","200","LCA","2","2","3","0.849095477386935","0.932110552763819","0.828336895881209","0.864220164693144","0.537388241030835","0.793716335398238","none"
+"sc6","4","200","GLM","2","2","2","0.932110552763819","0.932110552763819","0.864220164693144","0.864220164693144","0.793716335398238","0.793716335398238","none"
+"sc6","4","200","LMEM","2","2","1","0.49929648241206","0.922814070351759","0","0.845627835085535","0","0.75718528401289","none"
+"sc6","4","200","BMEM","2","2","1","0.49929648241206","0.932110552763819","0","0.864220164693144","0","0.793716335398238","2 Warnings: There were 12 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","4","200","BBMEM","2","2","0","0.674623115577889","0.932110552763819","1","0.864220164693144","0.36577743036799","0.793716335398238","2 Warnings: There were 14 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","4","200","LCA","2","3","3","0.804824120603015","0.913618090452261","0.560640068253761","0.827240393340476","0.510886886998317","0.752810129287323","none"
+"sc6","4","200","GLM","2","3","1","0.498291457286432","0.913618090452261","0","0.827240393340476","0","0.752810129287323","none"
+"sc6","4","200","LMEM","2","3","1","0.498291457286432","0.904522613065327","0","0.809048505012919","0","0.723686106374741","none"
+"sc6","4","200","BMEM","2","3","1","0.498291457286432","0.913618090452261","0","0.827240393340476","0","0.752810129287323","2 Warnings: There were 25 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","4","200","BBMEM","2","3","0","0.677788944723618","0.913618090452261","0.714733603234739","0.827240393340476","0.349912914799394","0.752810129287323","3 Warnings: There were 57 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","4","200","LCA","2","4","3","0.848040201005025","0.960603015075377","0.932440665200198","0.921205214366756","0.58603378612538","0.861617958603901","none"
+"sc6","4","200","GLM","2","4","1","0.497939698492462","0.960603015075377","0","0.921205214366756","0","0.861617958603901","none"
+"sc6","4","200","LMEM","2","4","1","0.497939698492462","0.960603015075377","0","0.921205214366756","0","0.861617958603901","none"
+"sc6","4","200","BMEM","2","4","1","0.497939698492462","0.960603015075377","0","0.921205214366756","0","0.861617958603901","2 Warnings: There were 36 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","4","200","BBMEM","2","4","0","0.667336683417085","0.960603015075377","0.664803726482918","0.921205214366756","0.355461579955858","0.861617958603901","2 Warnings: There were 50 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","4","200","LCA","2","5","4","0.786683417085427","0.960603015075377","0.629578351408033","0.921204785376979","0.462861465058034","0.861802118339654","none"
+"sc6","4","200","GLM","2","5","1","0.498291457286432","0.960603015075377","0","0.921204785376979","0","0.861802118339654","none"
+"sc6","4","200","LMEM","2","5","1","0.498291457286432","0.960603015075377","0","0.921204785376979","0","0.861802118339654","none"
+"sc6","4","200","BMEM","2","5","1","0.498291457286432","0.960603015075377","0","0.921204785376979","0","0.861802118339654","4 Warnings: There were 84 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","4","200","BBMEM","2","5","0","0.672311557788945","0.960603015075377","0.665111472222632","0.921204785376979","0.365760754928033","0.861802118339654","3 Warnings: There were 34 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","4","400","LCA","2","1","5","0.710563909774436","0.995","0.984321072108585","0.989999951984996","0.418880359624587","0.977217355731449","none"
+"sc6","4","400","GLM","2","1","2","0.990025062656642","0.990025062656642","0.980050036892394","0.980050036892394","0.954573649754495","0.954573649754495","none"
+"sc6","4","400","LMEM","2","1","1","0.498947368421053","0.990025062656642","0","0.980050036892394","0","0.954573649754495","none"
+"sc6","4","400","BMEM","2","1","1","0.498947368421053","0.995","0","0.989999951984996","0","0.977217355731449","2 Warnings: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","4","400","BBMEM","2","1","0","0.671729323308271","0.995","1","0.989999951984996","0.367552181381718","0.977217355731449","2 Warnings: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","4","400","LCA","2","2","6","0.649799498746867","0.975250626566416","1","0.950501082126338","0.333516546238613","0.90555533358521","none"
+"sc6","4","400","GLM","2","2","1","0.5015664160401","0.975250626566416","0","0.950501082126338","0","0.90555533358521","none"
+"sc6","4","400","LMEM","2","2","1","0.5015664160401","0.975250626566416","0","0.950500646831749","0","0.902794110604218","none"
+"sc6","4","400","BMEM","2","2","1","0.5015664160401","0.975250626566416","0","0.950501082126338","0","0.90555533358521","3 Warnings: There were 126 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","4","400","BBMEM","2","2","0","0.671992481203008","0.975250626566416","0.884153958335849","0.950501082126338","0.366213690178652","0.90555533358521","5 Warnings: There were 303 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: The largest R-hat is 1.05, indicating chains have not mixed.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#r-hat. Next warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","4","400","LCA","2","3","6","0.655250626566416","0.951127819548872","0.627446109383552","0.902255639097744","0.333688386726013","0.842106846308461","none"
+"sc6","4","400","GLM","2","3","1","0.5","0.900263157894737","0","0.800526315789474","0","0.702542209777108","none"
+"sc6","4","400","LMEM","2","3","1","0.5","0.946378446115288","0","0.892756892230576","0","0.821072892263712","1 Warnings: Model failed to converge with max|grad| = 0.00311713 (tol = 0.002, component 1). Next warning: checkConv(attr(opt, ""derivs""), opt$par, ctrl = control$checkConv, lbound = environment(devfun)$lower)"
+"sc6","4","400","BMEM","2","3","1","0.5","0.951127819548872","0","0.902255639097744","0","0.842106846308461","4 Warnings: There were 251 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","4","400","BBMEM","2","3","0","0.679135338345865","0.951127819548872","1","0.902255639097744","0.354579357923915","0.842106846308461","4 Warnings: There were 216 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","4","400","LCA","2","4","5","0.708984962406015","0.951127819548872","0.612083002633525","0.902255639097744","0.392367919015428","0.833578698082049","none"
+"sc6","4","400","GLM","2","4","1","0.499197994987469","0.951127819548872","0","0.90225526187419","0","0.833941465247956","none"
+"sc6","4","400","LMEM","2","4","1","0.499197994987469","0.951127819548872","0","0.902255309027293","0","0.831829919531614","none"
+"sc6","4","400","BMEM","2","4","1","0.499197994987469","0.951127819548872","0","0.902255639097744","0","0.833578698082049","2 Warnings: There were 106 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","4","400","BBMEM","2","4","0","0.671065162907268","0.951127819548872","0.956552767248189","0.90225526187419","0.351296216063587","0.833941465247956","4 Warnings: There were 131 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","4","400","LCA","2","5","6","0.653533834586466","0.941654135338346","0.628542402212418","0.883307770413209","0.330768727695133","0.8060271906824","none"
+"sc6","4","400","GLM","2","5","1","0.49906015037594","0.941654135338346","0","0.883307770413209","0","0.8060271906824","none"
+"sc6","4","400","LMEM","2","5","1","0.49906015037594","0.936954887218045","0","0.873909394265798","0","0.793181905655782","none"
+"sc6","4","400","BMEM","2","5","1","0.49906015037594","0.946378446115288","0","0.892756467839868","0","0.818341203281129","4 Warnings: There were 307 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","4","400","BBMEM","2","5","0","0.659548872180451","0.941654135338346","0.63039491073793","0.883307770413209","0.339442788726443","0.8060271906824","4 Warnings: There were 231 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","8","100","LCA","2","1","2","1","1","1","1","1","1","none"
+"sc6","8","100","GLM","2","1","1","0.5","1","0","1","0","1","none"
+"sc6","8","100","LMEM","2","1","1","0.5","1","0","1","0","1","none"
+"sc6","8","100","BMEM","2","1","1","0.5","1","0","1","0","1","2 Warnings: There were 6 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","8","100","BBMEM","2","1","0","0.731313131313131","1","1","1","0.432995304386009","1","2 Warnings: There were 4 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","8","100","LCA","2","2","2","0.98","0.98","0.959999059665682","0.959999059665682","0.9279714298902","0.9279714298902","none"
+"sc6","8","100","GLM","2","2","5","0.748484848484849","0.98","1","0.959999059665682","0.451498644877358","0.9279714298902","none"
+"sc6","8","100","LMEM","2","2","1","0.496767676767677","0.98","0","0.959999059665682","0","0.9279714298902","none"
+"sc6","8","100","BMEM","2","2","1","0.496767676767677","0.98","0","0.959999059665682","0","0.9279714298902","none"
+"sc6","8","100","BBMEM","2","2","0","0.707272727272727","0.98","1","0.959999059665682","0.403416768807458","0.9279714298902","none"
+"sc6","8","100","LCA","2","3","2","1","1","1","1","1","1","none"
+"sc6","8","100","GLM","2","3","2","0.98","0.98","0.959996081648646","0.959996081648646","0.9289911704819","0.9289911704819","none"
+"sc6","8","100","LMEM","2","3","1","0.494949494949495","0.98","0","0.959996081648646","0","0.9289911704819","none"
+"sc6","8","100","BMEM","2","3","1","0.494949494949495","1","0","1","0","1","2 Warnings: There were 15 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","8","100","BBMEM","2","3","0","0.713939393939394","1","0.634908238969153","1","0.427898101603537","1","none"
+"sc6","8","100","LCA","2","4","2","0.98","0.98","0.96","0.96","0.927102360840376","0.927102360840376","none"
+"sc6","8","100","GLM","2","4","2","0.98","0.98","0.96","0.96","0.927102360840376","0.927102360840376","1 Warnings: Model failed to converge with max|grad| = 0.00266469 (tol = 0.002, component 1). Next warning: checkConv(attr(opt, ""derivs""), opt$par, ctrl = control$checkConv, lbound = environment(devfun)$lower)"
+"sc6","8","100","LMEM","2","4","1","0.502222222222222","0.98","0","0.96","0","0.927102360840376","none"
+"sc6","8","100","BMEM","2","4","1","0.502222222222222","0.98","0","0.96","0","0.927102360840376","2 Warnings: There were 1 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","8","100","BBMEM","2","4","0","0.696969696969697","0.98","0.598930481283422","0.96","0.38603682812717","0.927102360840376","2 Warnings: There were 3 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","8","100","LCA","2","5","2","1","1","1","1","1","1","none"
+"sc6","8","100","GLM","2","5","2","1","1","1","1","1","1","none"
+"sc6","8","100","LMEM","2","5","1","0.5","1","0","1","0","1","none"
+"sc6","8","100","BMEM","2","5","1","0.5","1","0","1","0","1","2 Warnings: There were 8 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","8","100","BBMEM","2","5","0","0.684848484848485","1","1","1","0.403472374685925","1","2 Warnings: There were 11 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","8","200","LCA","2","1","3","0.890954773869347","1","1","1","0.689997923423844","1","none"
+"sc6","8","200","GLM","2","1","4","0.765326633165829","1","1","1","0.512428071558983","1","none"
+"sc6","8","200","LMEM","2","1","1","0.497537688442211","1","0","1","0","1","none"
+"sc6","8","200","BMEM","2","1","1","0.497537688442211","1","0","1","0","1","none"
+"sc6","8","200","BBMEM","2","1","0","0.72713567839196","1","1","1","0.436219907975059","1","none"
+"sc6","8","200","LCA","2","2","4","0.778994974874372","0.99","0.932459110609803","0.979999997171788","0.499332858874276","0.959006485176315","none"
+"sc6","8","200","GLM","2","2","2","1","1","1","1","1","1","none"
+"sc6","8","200","LMEM","2","2","1","0.49929648241206","1","0","1","0","1","none"
+"sc6","8","200","BMEM","2","2","1","0.49929648241206","0.99","0","0.979999997171788","0","0.959006485176315","2 Warnings: There were 3 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","8","200","BBMEM","2","2","0","0.693718592964824","0.99","1","0.979999997171788","0.395877762837246","0.959006485176315","2 Warnings: There were 33 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","8","200","LCA","2","3","5","0.707286432160804","0.99","0.942673383295278","0.979999718386985","0.416234749430275","0.959292686392644","none"
+"sc6","8","200","GLM","2","3","2","0.99","0.99","0.979999718386985","0.979999718386985","0.959292686392644","0.959292686392644","none"
+"sc6","8","200","LMEM","2","3","1","0.498291457286432","0.99","0","0.979999718386985","0","0.959292686392644","none"
+"sc6","8","200","BMEM","2","3","1","0.498291457286432","0.99","0","0.979999718386985","0","0.959292686392644","3 Warnings: There were 1 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess"
+"sc6","8","200","BBMEM","2","3","0","0.690904522613065","0.99","1","0.979999718386985","0.394289288061023","0.959292686392644","4 Warnings: There were 1 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+. Next warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess. Next warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","8","200","LCA","2","4","4","0.748844221105528","0.980100502512563","0.598911888936888","0.960200329251822","0.471698789437924","0.919160935163327","none"
+"sc6","8","200","GLM","2","4","4","0.79964824120603","0.980100502512563","1","0.960200329251822","0.503859083519883","0.919160935163327","none"
+"sc6","8","200","LMEM","2","4","1","0.497939698492462","0.980100502512563","0","0.960200329251822","0","0.919160935163327","none"
+"sc6","8","200","BMEM","2","4","1","0.497939698492462","0.980100502512563","0","0.960200329251822","0","0.919160935163327","none"
+"sc6","8","200","BBMEM","2","4","0","0.672613065326633","0.980100502512563","0.972451670777492","0.960200329251822","0.366469681837807","0.919160935163327","none"
+"sc6","8","200","LCA","2","5","3","0.876984924623116","1","0.634553145889236","1","0.673643782371515","1","none"
+"sc6","8","200","GLM","2","5","1","0.498291457286432","1","0","1","0","1","none"
+"sc6","8","200","LMEM","2","5","1","0.498291457286432","1","0","1","0","1","none"
+"sc6","8","200","BMEM","2","5","1","0.498291457286432","1","0","1","0","1","2 Warnings: There were 38 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","8","200","BBMEM","2","5","0","0.728693467336683","1","0.743799777595033","1","0.429053934043522","1","2 Warnings: There were 17 divergent transitions after warmup. See
+https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
+"
+"sc6","8","400","LCA","2","1","5","0.708696741854637","0.990025062656642","0.636059571967728","0.980050036892394","0.422225387479698","0.954573649754495","none"
+"sc6","8","400","GLM","2","1","2","0.990025062656642","0.990025062656642","0.980050036892394","0.980050036892394","0.954573649754495","0.954573649754495","none"
+"sc6","8","400","LMEM","2","1","1","0.498947368421053","0.990025062656642","0","0.980050036892394","0","0.954573649754495","none"
+"sc6","8","400","BMEM","2","1","1","0.498947368421053","0.990025062656642","0","0.980050036892394","0","0.954573649754495","none"
+"sc6","8","400","BBMEM","2","1","0","0.746077694235589","0.990025062656642","0.980123118256238","0.980050036892394","0.45571468611424","0.954573649754495","none"
+"sc6","8","400","LCA","2","2","6","0.664335839598998","0.990025062656642","0.970722764925448","0.980049829258118","0.375548347908004","0.958844966313467","none"
+"sc6","8","400","GLM","2","2","4","0.744385964912281","1","1","1","0.482283343949059","1","none"
+"sc6","8","400","LMEM","2","2","1","0.5015664160401","1","0","1","0","1","none"
+"sc6","8","400","BMEM","2","2","1","0.5015664160401","0.990025062656642","0","0.980049829258118","0","0.958844966313467","none"
+"sc6","8","400","BBMEM","2","2","0","0.681052631578947","0.990025062656642","0.974470164241522","0.980049829258118","0.387923981003785","0.958844966313467","none"
+"sc6","8","400","LCA","2","3","6","0.672393483709273","0.995","0.640441428784644","0.99","0.385913298534629","0.97708276256317","none"
+"sc6","8","400","GLM","2","3","2","0.995","0.995","0.99","0.99","0.97708276256317","0.97708276256317","none"
+"sc6","8","400","LMEM","2","3","1","0.5","0.995","0","0.99","0","0.97708276256317","1 Warnings: Model failed to converge with max|grad| = 0.00623066 (tol = 0.002, component 1). Next warning: checkConv(attr(opt, ""derivs""), opt$par, ctrl = control$checkConv, lbound = environment(devfun)$lower)"
+"sc6","8","400","BMEM","2","3","1","0.5","0.995","0","0.99","0","0.97708276256317","none"
+"sc6","8","400","BBMEM","2","3","0","0.71765664160401","0.995","0.592853079249998","0.99","0.42403850698543","0.97708276256317","none"
+"sc6","8","400","LCA","2","4","6","0.672518796992481","1","0.629550602915012","1","0.391537181059309","1","none"
+"sc6","8","400","GLM","2","4","5","0.760288220551378","0.995","1","0.989999979497574","0.490050270143507","0.977153436487067","none"
+"sc6","8","400","LMEM","2","4","1","0.499197994987469","1","0","1","0","1","none"
+"sc6","8","400","BMEM","2","4","1","0.499197994987469","1","0","1","0","1","none"
+"sc6","8","400","BBMEM","2","4","0","0.709924812030075","1","0.807655035161848","1","0.424378284792728","1","1 Warnings: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess"
+"sc6","8","400","LCA","2","5","6","0.668082706766917","0.995","1","0.989999960427228","0.375215842552364","0.977196793355581","none"
+"sc6","8","400","GLM","2","5","4","0.754298245614035","0.98015037593985","0.989664642823477","0.960300581686968","0.495330333831822","0.9209218319359","none"
+"sc6","8","400","LMEM","2","5","1","0.49906015037594","0.995","0","0.989999960427228","0","0.977196793355581","none"
+"sc6","8","400","BMEM","2","5","1","0.49906015037594","1","0","1","0","1","none"
+"sc6","8","400","BBMEM","2","5","0","0.722543859649123","0.995","1","0.989999960427228","0.427594169199716","0.977196793355581","none"
+"sc7","2","100","LCA","3","1","3","0.961616161616162","0.961616161616162","0.912857167477128","0.912857167477128","0.889660426677339","0.889660426677339","none"
+"sc7","2","100","GLM","3","1","6","0.874343434343434","0.960808080808081","1","0.911190841753233","0.618601578257703","0.888434243144319","none"
+"sc7","2","100","LMEM","3","1","3","0.905050505050505","0.905050505050505","0.785384920654688","0.785384920654688","0.769800939759711","0.769800939759711","none"
+"sc7","2","100","BMEM","3","1","3","0.905050505050505","0.905050505050505","0.785384920654688","0.785384920654688","0.769800939759711","0.769800939759711","none"
+"sc7","2","100","BBMEM","3","1","0","0.874343434343434","0.914747474747475","0.88894635957039","0.808147464422004","0.618601578257703","0.804691489568063","none"
+"sc7","2","100","LCA","3","2","3","0.959191919191919","0.959191919191919","0.908566577412625","0.908566577412625","0.886917745246089","0.886917745246089","none"
+"sc7","2","100","GLM","3","2","6","0.89979797979798","0.919191919191919","0.98193718688317","0.818403036301233","0.676047000235646","0.798483076147919","2 Warnings: Model failed to converge with max|grad| = 0.130678 (tol = 0.002, component 1). Next warning: checkConv(attr(opt, ""derivs""), opt$par, ctrl = control$checkConv, lbound = environment(devfun)$lower). Next warning: Model is nearly unidentifiable: very large eigenvalue
+ - Rescale variables?. Next warning: checkConv(attr(opt, ""derivs""), opt$par, ctrl = control$checkConv, lbound = environment(devfun)$lower)"
+"sc7","2","100","LMEM","3","2","3","0.919191919191919","0.919191919191919","0.819908873890188","0.819908873890188","0.816985360446635","0.816985360446635","none"
+"sc7","2","100","BMEM","3","2","2","0.739393939393939","0.919191919191919","0.477120297460453","0.819908873890188","0.445710138416606","0.816985360446635","none"
+"sc7","2","100","BBMEM","3","2","0","0.876767676767677","0.93030303030303","0.98193718688317","0.843815705550604","0.633326075835577","0.861086295578519","none"
+"sc7","2","100","LCA","3","3","3","0.946262626262626","0.946262626262626","0.87890768051051","0.87890768051051","0.862556917790483","0.862556917790483","none"
+"sc7","2","100","GLM","3","3","6","0.84969696969697","0.987474747474748","0.81464969494429","0.971697137048752","0.593835147206088","0.958479264615944","none"
+"sc7","2","100","LMEM","3","3","3","0.871515151515152","0.871515151515152","0.712240921311667","0.712240921311667","0.719517852189815","0.719517852189815","none"
+"sc7","2","100","BMEM","3","3","2","0.728686868686869","0.871515151515152","0.455814104261101","0.712240921311667","0.434605221278185","0.719517852189815","none"
+"sc7","2","100","BBMEM","3","3","0","0.852323232323232","0.874747474747475","0.868866083319425","0.719308553342442","0.608411249787866","0.758091275663892","none"
+"sc7","2","100","LCA","3","4","3","0.974141414141414","0.974141414141414","0.941311781715397","0.941311781715397","0.918097297485987","0.918097297485987","none"
+"sc7","2","100","GLM","3","4","6","0.898383838383838","0.938383838383838","0.973221297923822","0.860223320499524","0.646296843887269","0.84612537701532","none"
+"sc7","2","100","LMEM","3","4","3","0.914949494949495","0.914949494949495","0.808033741182375","0.808033741182375","0.771621521407216","0.771621521407216","none"
+"sc7","2","100","BMEM","3","4","3","0.914949494949495","0.914949494949495","0.808033741182375","0.808033741182375","0.771621521407216","0.771621521407216","none"
+"sc7","2","100","BBMEM","3","4","0","0.902424242424242","0.923232323232323","0.85068509193114","0.825934581385161","0.667582499152104","0.815739613780831","none"
+"sc7","2","100","LCA","3","5","3","0.964242424242424","0.964242424242424","0.919337450347167","0.919337450347167","0.906375268858497","0.906375268858497","none"
+"sc7","2","100","GLM","3","5","6","0.872121212121212","0.964242424242424","0.933968852863336","0.919337450347167","0.623021340029401","0.906375268858497","none"
+"sc7","2","100","LMEM","3","5","3","0.950909090909091","0.950909090909091","0.889122531839075","0.889122531839075","0.849558192864857","0.849558192864857","none"
+"sc7","2","100","BMEM","3","5","2","0.759393939393939","0.950909090909091","0.518787878787879","0.889122531839075","0.475573336285887","0.849558192864857","none"
+"sc7","2","100","BBMEM","3","5","0","0.872121212121212","0.912727272727273","0.933968852863336","0.805090542115172","0.623021340029401","0.816952631008834","none"
+"sc7","2","200","LCA","3","1","3","0.93","0.93","0.842059341934645","0.842059341934645","0.797863121159154","0.797863121159154","none"
+"sc7","2","200","GLM","3","1","6","0.854723618090452","0.93","0.764086680710482","0.842059341934645","0.564788860677753","0.797863121159154","none"
+"sc7","2","200","LMEM","3","1","3","0.888743718592965","0.888743718592965","0.749896603425508","0.749896603425508","0.751858880953454","0.751858880953454","none"
+"sc7","2","200","BMEM","3","1","2","0.701959798994975","0.888743718592965","0.40684209109621","0.749896603425508","0.406814477575339","0.751858880953454","none"
+"sc7","2","200","BBMEM","3","1","0","0.859396984924623","0.891407035175879","0.951292540516813","0.756096506876876","0.586049202095088","0.735509016186975","none"
+"sc7","2","200","LCA","3","2","3","0.943015075376884","0.943015075376884","0.87217440353861","0.87217440353861","0.832460635350964","0.832460635350964","none"
+"sc7","2","200","GLM","3","2","6","0.872814070351759","0.91286432160804","0.942872848039413","0.803778204146526","0.597212169383631","0.817293416216012","1 Warnings: Model failed to converge with max|grad| = 0.00364929 (tol = 0.002, component 1). Next warning: checkConv(attr(opt, ""derivs""), opt$par, ctrl = control$checkConv, lbound = environment(devfun)$lower)"
+"sc7","2","200","LMEM","3","2","3","0.892361809045226","0.892361809045226","0.762077158204897","0.762077158204897","0.746091555330452","0.746091555330452","none"
+"sc7","2","200","BMEM","3","2","2","0.739849246231156","0.892361809045226","0.48712464679747","0.762077158204897","0.451383583678391","0.746091555330452","none"
+"sc7","2","200","BBMEM","3","2","0","0.873819095477387","0.91286432160804","0.870802355619974","0.803778204146526","0.619484930073719","0.817293416216012","none"
+"sc7","2","200","LCA","3","3","3","0.968442211055276","0.968442211055276","0.928880263881696","0.928880263881696","0.90706852433073","0.90706852433073","none"
+"sc7","2","200","GLM","3","3","6","0.906984924623116","0.980502512562814","1","0.95606644738734","0.692025257102935","0.935155728484248","none"
+"sc7","2","200","LMEM","3","3","3","0.886030150753769","0.886030150753769","0.745432633384942","0.745432633384942","0.740018522569842","0.740018522569842","none"
+"sc7","2","200","BMEM","3","3","2","0.725226130653266","0.886030150753769","0.449544215678108","0.745432633384942","0.426498447145183","0.740018522569842","none"
+"sc7","2","200","BBMEM","3","3","0","0.891206030150754","0.92713567839196","1","0.836509854413145","0.651697680617728","0.819773729741009","none"
