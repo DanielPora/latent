@@ -60,7 +60,7 @@ grouped3$method <- factor(grouped3$method)
 m <- lm(RI_mean ~ n_subj, data=grouped)
 summary(m)
 
-df = rbind(grouped, grouped1, grouped2,grouped3)
+df = rbind(grouped, grouped1)
 
 ggplot(grouped, aes(x=obs_per_trial, y=RI_mean, color=method))+
   geom_jitter(height = 0, width = 0.5)

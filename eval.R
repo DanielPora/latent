@@ -15,6 +15,9 @@ library(rstudioapi)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 source("dataset_generator.R")
 
+
+sessionInfo()
+
 sc1 <- 
   c( 1,  0,  0,  0,  1,
      0,  0,  0,  0,  0,
