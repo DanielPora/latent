@@ -1,6 +1,6 @@
 *.rds
 *.png
-.RData
-.Rhistory
-.RDataTmp
-.RDataTmp1
+*.RData
+*.Rhistory
+*.RDataTmp
+*.RDataTmp1

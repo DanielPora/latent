@@ -13,7 +13,7 @@ library(brms)
 
 library(rstudioapi)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-source("dataset_generator.R")
+source("./data_generation/dataset_generator.R")
 
 
 sessionInfo()
@@ -86,6 +86,7 @@ names(measure_df) = row.names
 
 folder = paste('./data/',time_id,"/", sep="")
 
+
 if (!dir.exists(folder)) dir.create(folder, recursive = TRUE)
 if (!file.exists(paste(folder,'./analysis_data.csv', sep=''))){
   write.csv(measure_df, paste(folder,"analysis_data.csv", sep=''), row.names=FALSE)
@@ -102,16 +103,16 @@ if (!file.exists(paste(folder,'./analysis_data.csv', sep=''))){
 }
 warn <- 'none'
 
-scenario <- 5
-obs_per_trial <- 2
-n_subject <- 100
-run <- 2
+scenario <- 2
+obs_per_trial <- 8
+n_subject <- 400
+run <- 7
 
+for (scenario in 9:9){  
+  for (obs_per_trial in c(8)){
+    for (n_subject in c(400)){ 
+      for (run in 99:99){
 
-for (scenario in 7:9){  
-  for (obs_per_trial in c(2,4,8)){
-    for (n_subject in c(100,200,400)){ 
-      for (run in 1:5){
         
        
         sc_name <- names(scenarios)[scenario]
@@ -129,7 +130,7 @@ for (scenario in 7:9){
         raw_data <- data
         # True number of classes
         n_true <- length(levels(data$true_class))
-        # Number of obs. per trial
+        # Number of obs. per trial (refers to L,R,F,B trials ->obs_per_trial=2 => 4LR =2L+2R and 4 FB = 2F+2B)
         n_obs <- nrow(dplyr::filter(data, Subject == 1))/2
         
         
@@ -167,13 +168,19 @@ for (scenario in 7:9){
         }
         
         f <- as.formula(with(df.LCA, formula_func(colnames(df.LCA), df.LCA)))
-        bics <- c()
-        for (x in 1:6) {
-          lca_x <- poLCA(f, df.LCA, nclass = x, nrep = 10, verbose=FALSE)$bic 
-          bics <- append(bics, lca_x)
-        }
+
+        bics <- numeric(length = 6)
         
-                                                      
+        for (x in 1:6) {
+          tryCatch({
+            lca_x <- poLCA(f, df.LCA, nclass = x, nrep = 10, verbose = FALSE, graphs = FALSE)$bic
+          }, error = function(e) {
+            lca_x <- Inf
+          })
+          
+          bics[x] <- lca_x
+        }
+    
         opt_class <- which.min(bics)
 
         
@@ -345,289 +352,289 @@ for (scenario in 7:9){
         
          
         ######### lmem  #########
-        ww <- c()
-        
-        
-        tryCatch(
-         withCallingHandlers(m0 <- lmer(own.cod ~ trial_type + (1+trial_type | Subject), data=data)
-                           , warning = function(w) ww <<- c(ww, list(w)))
-        )
-        
-        
-        wlen <- length(ww)
-        ww <- unlist(ww)
-        
-        if (wlen > 0) {
-          warn <- paste(wlen, " Warnings: ", paste(ww, collapse = '. Next warning: '), sep='')
-        } else {
-          warn <- 'none'
-        }
-        
-        coeffs <- coef(m0)$Subject
-        coeffs
-        
-        coeffs$FB <-  coeffs$`(Intercept)`
-        coeffs$LR <-  coeffs$trial_typeLR
-
-        
-        ahp <- coeffs %>%
-          dplyr::select(FB, LR) %>%
-          single_imputation() %>%
-          estimate_profiles(1:6)%>%
-          compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik", "CLC", "KIC"))
-  
-        lmem_mod <- coeffs %>%
-          dplyr::select(FB, LR) %>%
-          single_imputation() %>%
-          estimate_profiles(ahp$AHP)
-        
-        lmem_tc <- coeffs %>%
-          dplyr::select(FB, LR) %>%
-          single_imputation() %>%
-          estimate_profiles(n_true)
-        
-        lmem_class <- get_data(lmem_mod)$Class %>%
-          factor()
-        
-        lmem_class_tc <- get_data(lmem_tc)$Class %>%
-          factor()
-        
-        lmem_class <- data.frame(Subject = 1:length(lmem_class),lmem.class = lmem_class)
-        lmem_class$Subject <- factor(lmem_class$Subject)
-        
-        lmem_class_tc <- data.frame(Subject = 1:length(lmem_class_tc),lmem.tc = lmem_class_tc)
-        lmem_class_tc$Subject <- factor(lmem_class_tc$Subject)
-        
-        data$Subject <- factor(data$Subject)
-        
-        data <- left_join(data, lmem_class, by="Subject")
-        data <- left_join(data, lmem_class_tc, by="Subject")
-        
-        
-        
-        # measure for GMEM
-        class_compare <- distinct(data[ , c('Subject', 'lmem.class', 'true_class', 'lmem.tc')])
-        
-        RI <- rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$lmem.class))
-        adj.RI <- adj.rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$lmem.class))
-        NMI <- NMI(as.numeric(class_compare$true_class),as.numeric(class_compare$lmem.class))
-        RIc <- rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$lmem.tc))
-        adj.RIc <- adj.rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$lmem.tc))
-        NMIc<- NMI(as.numeric(class_compare$true_class),as.numeric(class_compare$lmem.tc))
-        n_pred <- length(levels(class_compare$lmem.class))
-        
-        mes_GLM <- c(sc_name, obs_per_trial, n_subject, 'LMEM', n_true, run, n_pred, RI, RIc, adj.RI, adj.RIc, NMI, NMIc, warn)
-        measure_df[nrow(measure_df)+1,] <- mes_GLM
-        
-        # eval plot for GLM
-        plot_data <- left_join(class_compare, distinct(data[ , c('Subject','true_class','fb_tend', 'lr_tend')]))
-        
-        png(paste(filepath,'lmem',run,'.png', sep=''))
-        lmem_plot <- ggplot(plot_data, aes(lr_tend,fb_tend, color=lmem.class))+
-          geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
-        Sys.sleep(0.5)
-        print(lmem_plot)
-        dev.off()
-        
-        
-        png(paste(filepath,'lmem_tc',run,'.png', sep=''))
-        lmem_tc_plot <- ggplot(plot_data, aes(lr_tend,fb_tend, color=lmem.tc))+
-          geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
-        print(lmem_tc_plot)
-        Sys.sleep(0.5)
-        dev.off()
-        
+        # ww <- c()
+        # 
+        # 
+        # tryCatch(
+        #  withCallingHandlers(m0 <- lmer(own.cod ~ trial_type + (1+trial_type | Subject), data=data)
+        #                    , warning = function(w) ww <<- c(ww, list(w)))
+        # )
+        # 
+        # 
+        # wlen <- length(ww)
+        # ww <- unlist(ww)
+        # 
+        # if (wlen > 0) {
+        #   warn <- paste(wlen, " Warnings: ", paste(ww, collapse = '. Next warning: '), sep='')
+        # } else {
+        #   warn <- 'none'
+        # }
+        # 
+        # coeffs <- coef(m0)$Subject
+        # coeffs
+        # 
+        # coeffs$FB <-  coeffs$`(Intercept)`
+        # coeffs$LR <-  coeffs$trial_typeLR
+        # 
+        # 
+        # ahp <- coeffs %>%
+        #   dplyr::select(FB, LR) %>%
+        #   single_imputation() %>%
+        #   estimate_profiles(1:6)%>%
+        #   compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik", "CLC", "KIC"))
+        # 
+        # lmem_mod <- coeffs %>%
+        #   dplyr::select(FB, LR) %>%
+        #   single_imputation() %>%
+        #   estimate_profiles(ahp$AHP)
+        # 
+        # lmem_tc <- coeffs %>%
+        #   dplyr::select(FB, LR) %>%
+        #   single_imputation() %>%
+        #   estimate_profiles(n_true)
+        # 
+        # lmem_class <- get_data(lmem_mod)$Class %>%
+        #   factor()
+        # 
+        # lmem_class_tc <- get_data(lmem_tc)$Class %>%
+        #   factor()
+        # 
+        # lmem_class <- data.frame(Subject = 1:length(lmem_class),lmem.class = lmem_class)
+        # lmem_class$Subject <- factor(lmem_class$Subject)
+        # 
+        # lmem_class_tc <- data.frame(Subject = 1:length(lmem_class_tc),lmem.tc = lmem_class_tc)
+        # lmem_class_tc$Subject <- factor(lmem_class_tc$Subject)
+        # 
+        # data$Subject <- factor(data$Subject)
+        # 
+        # data <- left_join(data, lmem_class, by="Subject")
+        # data <- left_join(data, lmem_class_tc, by="Subject")
+        # 
+        # 
+        # 
+        # # measure for GMEM
+        # class_compare <- distinct(data[ , c('Subject', 'lmem.class', 'true_class', 'lmem.tc')])
+        # 
+        # RI <- rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$lmem.class))
+        # adj.RI <- adj.rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$lmem.class))
+        # NMI <- NMI(as.numeric(class_compare$true_class),as.numeric(class_compare$lmem.class))
+        # RIc <- rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$lmem.tc))
+        # adj.RIc <- adj.rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$lmem.tc))
+        # NMIc<- NMI(as.numeric(class_compare$true_class),as.numeric(class_compare$lmem.tc))
+        # n_pred <- length(levels(class_compare$lmem.class))
+        # 
+        # mes_GLM <- c(sc_name, obs_per_trial, n_subject, 'LMEM', n_true, run, n_pred, RI, RIc, adj.RI, adj.RIc, NMI, NMIc, warn)
+        # measure_df[nrow(measure_df)+1,] <- mes_GLM
+        # 
+        # # eval plot for GLM
+        # plot_data <- left_join(class_compare, distinct(data[ , c('Subject','true_class','fb_tend', 'lr_tend')]))
+        # 
+        # png(paste(filepath,'lmem',run,'.png', sep=''))
+        # lmem_plot <- ggplot(plot_data, aes(lr_tend,fb_tend, color=lmem.class))+
+        #   geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
+        # Sys.sleep(0.5)
+        # print(lmem_plot)
+        # dev.off()
+        # 
+        # 
+        # png(paste(filepath,'lmem_tc',run,'.png', sep=''))
+        # lmem_tc_plot <- ggplot(plot_data, aes(lr_tend,fb_tend, color=lmem.tc))+
+        #   geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
+        # print(lmem_tc_plot)
+        # Sys.sleep(0.5)
+        # dev.off()
+        # 
         #### BMEM analysis
+# 
+#         ww <- c()
+# 
+#         tryCatch(
+#         withCallingHandlers(bm2 <- brm(data = data, own.cod ~ trial_type + (1+trial_type | Subject),
+#                                       seed = 123,
+#                                      cores = 8,
+#                                     iter = 4000, warmup = 2000,
+#                                    file = paste(filepath, 'bm', run, sep = ""))
+#                        , warning = function(w) ww <<- c(ww, list(w)))
+#                )
+# 
+# 
+#         wlen <- length(ww)
+#         ww <- unlist(ww)
+# 
+#         if (wlen > 0) {
+#           warn <- paste(wlen, " Warnings: ", paste(ww, collapse = '. Next warning: '), sep='')
+#         } else {
+#           warn <- 'none'
+#         }
+# 
+#         bmcoeff <- coef(bm2)$Subject
+# 
+# 
+# 
+# 
+#         coeffs <- coeffs %>%
+#           mutate("FB_bmr" = bmcoeff[1:nrow(bmcoeff),1,1]) %>%
+#           mutate("LR_bmr" = bmcoeff[1:nrow(bmcoeff),1,1] + bmcoeff[1:nrow(bmcoeff),1,2])
+# 
+# 
+#         ahp <- coeffs %>%
+#           dplyr::select(FB_bmr, LR_bmr) %>%
+#           single_imputation() %>%
+#           estimate_profiles(1:6)%>%
+#           compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik"))
+# 
+#         bm_mod <- coeffs %>%
+#           dplyr::select(FB_bmr, LR_bmr) %>%
+#           single_imputation() %>%
+#           estimate_profiles(ahp$AHP)
+# 
+#         bm_mod_tc <- coeffs %>%
+#           dplyr::select(FB_bmr, LR_bmr) %>%
+#           single_imputation() %>%
+#           estimate_profiles(n_true)
+# 
+#         bm_class_tc <- get_data(bm_mod_tc)$Class %>%
+#           factor()
+# 
+#         bm_class <- get_data(bm_mod)$Class %>%
+#           factor()
+# 
+#         bm_class <- data.frame(Subject = 1:length(bm_class),bm.class = bm_class)
+#         bm_class$Subject <- factor(bm_class$Subject)
+#         bm_class_tc <- data.frame(Subject = 1:length(bm_class_tc),bm.tc = bm_class_tc)
+#         bm_class_tc$Subject <- factor(bm_class_tc$Subject)
+# 
+#         data <- left_join(data, bm_class, by="Subject")
+#         data <- left_join(data, bm_class_tc, by="Subject")
+# 
+# 
+#         # measure for BMEM
+#         class_compare <- distinct(data[ , c('Subject', 'bm.class', 'true_class', 'bm.tc')])
+# 
+#         RI <- rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$bm.class))
+#         adj.RI <- adj.rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$bm.class))
+#         NMI <- NMI(as.numeric(class_compare$true_class),as.numeric(class_compare$bm.class))
+#         RIc <- rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$bm.tc))
+#         adj.RIc <- adj.rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$bm.tc))
+#         NMIc <- NMI(as.numeric(class_compare$true_class),as.numeric(class_compare$bm.tc))
+#         n_pred <- length(levels(class_compare$bm.class))
+# 
+# 
+#         mes_BM <- c(sc_name, obs_per_trial, n_subject, 'BMEM', n_true, run, n_pred, RI, RIc, adj.RI, adj.RIc, NMI, NMIc, warn)
+#         measure_df[nrow(measure_df)+1,] <- mes_BM
+# 
+#         ## plot BM
+#         plot_data <- left_join(class_compare, distinct(data[ , c('Subject','true_class','fb_tend', 'lr_tend')]))
+# 
+#         png(paste(filepath,'bm',run,'.png', sep=''))
+#         plot_bm <- ggplot(plot_data, aes(lr_tend,fb_tend, color=bm.class))+
+#           geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
+#         print(plot_bm)
+#         Sys.sleep(0.5)
+#         dev.off()
+# 
+# 
+#         png(paste(filepath,'bm_tc',run,'.png', sep=''))
+#         plot_tc_bm <- ggplot(plot_data, aes(lr_tend,fb_tend, color=bm.tc))+
+#           geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
+#         print(plot_tc_bm)
+#         Sys.sleep(0.5)
+#         dev.off()
 
-        ww <- c()
-        
-        tryCatch(
-        withCallingHandlers(bm2 <- brm(data = data, own.cod ~ trial_type + (1+trial_type | Subject),
-                                      seed = 123,
-                                     cores = 8,
-                                    iter = 4000, warmup = 2000,
-                                   file = paste(filepath, 'bm', run, sep = ""))
-                       , warning = function(w) ww <<- c(ww, list(w)))
-               )
-        
-        
-        wlen <- length(ww)
-        ww <- unlist(ww)
-        
-        if (wlen > 0) {
-          warn <- paste(wlen, " Warnings: ", paste(ww, collapse = '. Next warning: '), sep='')
-        } else {
-          warn <- 'none'
-        }
-        
-        bmcoeff <- coef(bm2)$Subject
-        
-        
-        
-        
-        coeffs <- coeffs %>%
-          mutate("FB_bmr" = bmcoeff[1:nrow(bmcoeff),1,1]) %>%
-          mutate("LR_bmr" = bmcoeff[1:nrow(bmcoeff),1,1] + bmcoeff[1:nrow(bmcoeff),1,2])
-        
-
-        ahp <- coeffs %>%
-          dplyr::select(FB_bmr, LR_bmr) %>%
-          single_imputation() %>%
-          estimate_profiles(1:6)%>% 
-          compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik"))
-        
-        bm_mod <- coeffs %>%
-          dplyr::select(FB_bmr, LR_bmr) %>%
-          single_imputation() %>%
-          estimate_profiles(ahp$AHP)
-        
-        bm_mod_tc <- coeffs %>%
-          dplyr::select(FB_bmr, LR_bmr) %>%
-          single_imputation() %>%
-          estimate_profiles(n_true)
-        
-        bm_class_tc <- get_data(bm_mod_tc)$Class %>%
-          factor()
-        
-        bm_class <- get_data(bm_mod)$Class %>%
-          factor()
-        
-        bm_class <- data.frame(Subject = 1:length(bm_class),bm.class = bm_class)
-        bm_class$Subject <- factor(bm_class$Subject)
-        bm_class_tc <- data.frame(Subject = 1:length(bm_class_tc),bm.tc = bm_class_tc)
-        bm_class_tc$Subject <- factor(bm_class_tc$Subject)
-        
-        data <- left_join(data, bm_class, by="Subject")
-        data <- left_join(data, bm_class_tc, by="Subject")
-        
-         
-        # measure for BMEM
-        class_compare <- distinct(data[ , c('Subject', 'bm.class', 'true_class', 'bm.tc')])
-        
-        RI <- rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$bm.class))
-        adj.RI <- adj.rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$bm.class))
-        NMI <- NMI(as.numeric(class_compare$true_class),as.numeric(class_compare$bm.class))
-        RIc <- rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$bm.tc))
-        adj.RIc <- adj.rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$bm.tc))
-        NMIc <- NMI(as.numeric(class_compare$true_class),as.numeric(class_compare$bm.tc))
-        n_pred <- length(levels(class_compare$bm.class))
-        
-      
-        mes_BM <- c(sc_name, obs_per_trial, n_subject, 'BMEM', n_true, run, n_pred, RI, RIc, adj.RI, adj.RIc, NMI, NMIc, warn)
-        measure_df[nrow(measure_df)+1,] <- mes_BM
-        
-        ## plot BM
-        plot_data <- left_join(class_compare, distinct(data[ , c('Subject','true_class','fb_tend', 'lr_tend')]))
-        
-        png(paste(filepath,'bm',run,'.png', sep=''))
-        plot_bm <- ggplot(plot_data, aes(lr_tend,fb_tend, color=bm.class))+
-          geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
-        print(plot_bm)
-        Sys.sleep(0.5)
-        dev.off()
-        
-        
-        png(paste(filepath,'bm_tc',run,'.png', sep=''))
-        plot_tc_bm <- ggplot(plot_data, aes(lr_tend,fb_tend, color=bm.tc))+
-          geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
-        print(plot_tc_bm)
-        Sys.sleep(0.5)
-        dev.off()
-        
         
         
         #### BBM analysis
         
         ww <- c()
-        
-        
+
+
          tryCatch(
             withCallingHandlers(bm2 <- brm(data = data, own.cod ~ trial_type + (1+trial_type | Subject),
                                            family = bernoulli(),
-                                           seed = 123,
+                                           seed = 123+run,
                                            cores = 8,
-                                           iter = 4000, warmup = 2000,
+                                           iter = 2000, warmup = 1000,
                                            file = paste(filepath, 'bbm', run, sep = ""))
                                 , warning = function(w) ww <<- c(ww, list(w)))
          )
-        
-        
-        
+
+
+
         wlen <- length(ww)
         ww <- unlist(ww)
-        
+
         if (wlen > 0) {
           warn <- paste(wlen, " Warnings: ", paste(ww, collapse = '. Next warning: '), sep='')
         } else {
           warn <- 'none'
         }
-        
+
         bmcoeff <- coef(bm2)$Subject
-        
+
         coeffs <- coeffs %>%
           mutate("FB_bmr" = bmcoeff[1:nrow(bmcoeff),1,1]) %>%
           mutate("LR_bmr" = bmcoeff[1:nrow(bmcoeff),1,1] + bmcoeff[1:nrow(bmcoeff),1,2])
-        
-       
+
+
         ahp <- coeffs %>%
           dplyr::select(FB_bmr, LR_bmr) %>%
           single_imputation() %>%
-          estimate_profiles(1:6)%>% 
+          estimate_profiles(1:6)%>%
           compare_solutions(statistics=c("AIC", "BIC", "Entropy", "LogLik"))
-        
+
         bbm_mod <- coeffs %>%
           dplyr::select(FB_bmr, LR_bmr) %>%
           single_imputation() %>%
           estimate_profiles(ahp$AHP)
-        
+
         bbm_mod_tc <- coeffs %>%
           dplyr::select(FB_bmr, LR_bmr) %>%
           single_imputation() %>%
           estimate_profiles(n_true)
-        
+
         bbm_class_tc <- get_data(bbm_mod_tc)$Class %>%
           factor()
-        
+
         bbm_class <- get_data(bbm_mod)$Class %>%
           factor()
-        
+
         bbm_class <- data.frame(Subject = 1:length(bbm_class),bbm.class = bbm_class)
         bbm_class$Subject <- factor(bbm_class$Subject)
         bbm_class_tc <- data.frame(Subject = 1:length(bbm_class_tc),bbm.tc = bbm_class_tc)
         bbm_class_tc$Subject <- factor(bbm_class_tc$Subject)
-        
+
         data <- left_join(data, bbm_class, by="Subject")
         data <- left_join(data, bbm_class_tc, by="Subject")
-        
-  
+
+
         # measure for BMEM
         class_compare <- distinct(data[ , c('Subject', 'bbm.class', 'true_class', 'bbm.tc')])
-        
+
         adj.RI <- adj.rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$bbm.class))
         RI <- rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$bbm.class))
         NMI <- NMI(as.numeric(class_compare$true_class),as.numeric(class_compare$bbm.class))
         adj.RIc <- adj.rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$bbm.tc))
         RIc <- rand.index(as.numeric(class_compare$true_class),as.numeric(class_compare$bbm.tc))
         NMIc <- NMI(as.numeric(class_compare$true_class),as.numeric(class_compare$bbm.tc))
-        n_pred <- length(levels(class_compare$bm.class))
-        
-        
-        
-        
-        mes_BM <- c(sc_name, obs_per_trial, n_subject, 'BBMEM', n_true, run, n_pred, RI, RIc, adj.RI, adj.RIc, NMI, NMIc, warn)
+        n_pred <- length(levels(class_compare$bbm.class))
+
+
+
+
+        mes_BM <- c(sc_name, obs_per_trial, n_subject, 'BMEM', n_true, run, n_pred, RI, RIc, adj.RI, adj.RIc, NMI, NMIc, warn)
         measure_df[nrow(measure_df)+1,] <- mes_BM
-        
+
         ## plot BM
         plot_data <- left_join(class_compare, distinct(data[ , c('Subject','true_class','fb_tend', 'lr_tend')]))
-        
+
         png(paste(filepath,'bbm',run,'.png', sep=''))
         plot_bm <- ggplot(plot_data, aes(lr_tend,fb_tend, color=bbm.class))+
           geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
         print(plot_bm)
         Sys.sleep(0.5)
         dev.off()
-        
-        
+
+
         png(paste(filepath,'bbm_tc',run,'.png', sep=''))
         plot_tc_bm <- ggplot(plot_data, aes(lr_tend,fb_tend, color=bbm.tc))+
           geom_jitter(width=0.05, height=0.05, aes(shape=true_class))
@@ -642,6 +649,7 @@ for (scenario in 7:9){
         
         write.csv(measure_df, paste(folder,"analysis_data.csv", sep=''), row.names=FALSE)
         
+
       }
       
     }
