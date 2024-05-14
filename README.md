@@ -1,6 +1,5 @@
 
 
-
 ### Repository to my bachelors thesis "using mixed effect modeling to assign individuals to latent classes"
 ### by Daniel Porawski @ Saarland University
 
