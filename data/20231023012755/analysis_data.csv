@@ -1,7 +1,0 @@
-"scenario","obs_per_trial","n_subj","method","class_true","run","class_pred","RI","RIc","NMI","NMIc","warnings"
-"sc6","4","200","LCA","2","1","4","0.730115661144108","0.990046889653017","0.424929920820907","0.959456949772574","none"
-"sc6","4","200","GLM","2","1","1","0.499893716786496","0.990046889653017","0","0.959456949772574","none"
-"sc6","4","200","BMEM","2","1","1","0.499893716786496","0.990046889653017","0","0.959456949772574","2 Warnings: There were 15 divergent transitions after warmup. See
-https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
-to find out why this is a problem and how to eliminate them.. Next warning: Examine the pairs() plot to diagnose sampling problems
-"

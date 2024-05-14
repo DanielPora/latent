@@ -1,22 +1,23 @@
-analysis.R 
-was used to explore the original data set and understand its structure
 
-eval.R 
-will perform the whole experiment, including generating the data and testing the methods on it.
-results, data, and even models will be saved in the ./data/ folder in a subdirectory named according to a timestamp ID.
-Bayesian model files take a lot of disk space, so they are not uploaded here.
 
-data_gen.R (depreciated)
-functions to generate synthetic data with L,R,B,F types seperate
-plots for data generation
 
-data_generator.R
-used in the main experiment, functions to generate synthetic data with FB and LR type
+### Repository to my bachelors thesis "using mixed effect modeling to assign individuals to latent classes"
+### by Daniel Porawski @ Saarland University
 
-plots.R
-creates plots to use in the thesis
 
-results/bernoulli/results.R 
-merges the results for both runs with Benoulli and Gauss families, some plots for results
-used to analyze results
+#### ./preliminary/
+This folder contains all analysis results of the original data to explore its structure
+
+#### ./data_generation/
+This folder contains the scripts to generate or plot the scenarios.
+
+#### eval.R
+The script will perform the entire experiment, including generating the data and testing the methods on it. The results, data, and even models will be saved in the `./data/` folder in a subdirectory. Since Bayesian model files take up a lot of disk space, one should be carefull when running the whole experiment and using the "file =" kexword in bmr. 
+
+#### ./data/
+Contains the evaluated clustering tasks. The data for the thesis is saved in ./data/part1/ , incuding plots of assignments and raw data for all scenario instances.
+Additionally, the evaluation for a preliminary experiment with linear mixed models is found in ./data/gaus/
+
+#### ./results/
+Script for statistical analysis of results, plotting and a copy of evaluation result dataframe
 
