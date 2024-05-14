@@ -1,6 +1,7 @@
 *.rds
-*.png
 *.RData
 *.Rhistory
 *.RDataTmp
 *.RDataTmp1
+*.ipynb_checkpoints
+*.vscode
